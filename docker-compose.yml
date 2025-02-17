@@ -1,5 +1,11 @@
+version: '3.8' 
+
 volumes:
-  mongodb_data: { driver: local }
+  mongodb_data:
+    driver: local
+  mongodb_data_for_app:
+    driver: local
+
 
 services:
   rocketchat:
@@ -24,7 +30,7 @@ services:
       DEPLOY_PLATFORM: ${DEPLOY_PLATFORM:-}
       REG_TOKEN: ${REG_TOKEN:-}
     depends_on:
-      - mongodb
+      - mongodb  
     expose:
       - ${PORT:-3000}
     ports:
@@ -35,6 +41,7 @@ services:
     restart: always
     volumes:
       - mongodb_data:/bitnami/mongodb
+
     environment:
       MONGODB_REPLICA_SET_MODE: primary
       MONGODB_REPLICA_SET_NAME: ${MONGODB_REPLICA_SET_NAME:-rs0}
@@ -44,3 +51,12 @@ services:
       MONGODB_ADVERTISED_HOSTNAME: ${MONGODB_ADVERTISED_HOSTNAME:-mongodb}
       MONGODB_ENABLE_JOURNAL: ${MONGODB_ENABLE_JOURNAL:-true}
       ALLOW_EMPTY_PASSWORD: ${ALLOW_EMPTY_PASSWORD:-yes}
+  
+  mongodb_for_app:
+      image: mongo:8.0
+      volumes:
+        - mongodb_data_for_app:/data/db
+      ports:
+        - 27017:27017
+      restart: unless-stopped
+
