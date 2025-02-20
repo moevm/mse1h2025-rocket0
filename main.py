@@ -23,7 +23,7 @@ class RocketChatBot:
     def register_command(self, command: str, handler, description: str = ''):
         self.commands[command] = {'handler': handler, 'description': description}
 
-    async def handle_command(self, command, args, message):
+    async def handle_command(self, command: str, args: list[str], message):
         if command in self.commands:
             try:
                 await self.commands[command]['handler'](args, message)
@@ -33,7 +33,7 @@ class RocketChatBot:
         else:
             await self.async_client.send_message('Неизвестная команда.', message['rid'])
 
-    async def command_time(self, args, message):
+    async def command_time(self, args: list[str], message):
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         await self.async_client.send_message(f'Текущее время: {current_time}', message['rid'])
 
@@ -72,8 +72,7 @@ class RocketChatBot:
                     await self.async_client.subscribe_to_channel_messages_raw(channel_id, self.message_callback)
 
                 await self.async_client.run_forever()
-            except (RocketChatAsync.ConnectionClosed,
-                    RocketChatAsync.ConnectCallFailed) as e:
+            except (RocketChatAsync.ConnectionClosed, RocketChatAsync.ConnectCallFailed) as e:
                 print(f'Connection failed: {e}. Waiting a few seconds...')
                 await asyncio.sleep(3)
                 print('Reconnecting...')
