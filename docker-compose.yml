@@ -1,13 +1,13 @@
 volumes:
   mongodb_data:
     driver: local
-  mongodb_data_for_app:
-    driver: local
 
 
 services:
   rocketchat:
-    image: ${IMAGE:-registry.rocket.chat/rocketchat/rocket.chat}:${RELEASE:-latest}
+    image: registry.rocket.chat/rocketchat/rocket.chat:7.3.1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     labels:
       traefik.enable: "true"
       traefik.http.routers.rocketchat.rule: Host(`${DOMAIN:-}`)
@@ -34,7 +34,7 @@ services:
       - "${BIND_IP:-0.0.0.0}:${HOST_PORT:-3000}:${PORT:-3000}"
 
   mongodb:
-    image: docker.io/bitnami/mongodb:${MONGODB_VERSION:-8.0}
+    image: docker.io/bitnami/mongodb:8.0
     volumes:
       - mongodb_data:/bitnami/mongodb
 
@@ -47,11 +47,3 @@ services:
       MONGODB_ADVERTISED_HOSTNAME: ${MONGODB_ADVERTISED_HOSTNAME:-mongodb}
       MONGODB_ENABLE_JOURNAL: ${MONGODB_ENABLE_JOURNAL:-true}
       ALLOW_EMPTY_PASSWORD: ${ALLOW_EMPTY_PASSWORD:-yes}
-
-  # TODO: Вынести в отдельный docker-compose.yml
-  mongodb_for_app:
-    image: mongo:8.0
-    volumes:
-      - mongodb_data_for_app:/data/db
-    ports:
-      - "27017:27017"
