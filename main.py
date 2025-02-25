@@ -80,7 +80,6 @@ class RocketChatBot:
 
 
 if __name__ == '__main__':
-    load_dotenv()
     SERVER_URL = os.getenv('ROCKET_CHAT_URL')
     USERNAME = os.getenv('ROCKET_CHAT_USER')
     PASSWORD = os.getenv('ROCKET_CHAT_PASSWORD')
