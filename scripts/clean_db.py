@@ -1,11 +1,7 @@
 from pymongo import MongoClient
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
 
 client = MongoClient('mongodb://localhost:27017')
-
 database_names = client.list_database_names()
 
 system_databases = ['admin', 'local', 'config']
@@ -19,7 +15,6 @@ for db_name in database_names:
         collection = db[collection_name]
 
         result = collection.delete_many({})
-        print(
-            f"Удалено {result.deleted_count} документов из коллекции {collection_name} в базе данных {db_name}")
+        print(f"Удалено {result.deleted_count} документов из коллекции {collection_name} в базе данных {db_name}")
 
 client.close()
