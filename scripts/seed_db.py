@@ -1,9 +1,6 @@
-from requests import sessions
-from pprint import pprint
-from rocketchat_API.rocketchat import RocketChat
 from dotenv import load_dotenv
-import os
 from pymongo import MongoClient
+
 
 load_dotenv()
 client = MongoClient('mongodb://localhost:27017')
