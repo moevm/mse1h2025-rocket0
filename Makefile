@@ -10,8 +10,8 @@ bot-compose-down:
 chat-compose-up:
 	docker compose -f chat_infrastructure/docker-compose.yml up -d --build
 
-.PHONY: chat-use-dump
-chat-use-dump:
+.PHONY: load-chat-dump
+load-chat-dump:
 	docker cp ./dump chat_infrastructure-mongodb-1:/dump
 	docker exec -it chat_infrastructure-mongodb-1 mongorestore --drop /dump
 
