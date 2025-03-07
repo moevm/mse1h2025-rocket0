@@ -8,3 +8,4 @@ rocketchat_API==1.35.0
 urllib3==2.3.0
 rocketchat-async==4.2.0
 pymongo==4.6.3
+python-json-logger==3.3.0
