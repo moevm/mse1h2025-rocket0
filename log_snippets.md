@@ -1,81 +1,36 @@
 # Примеры логирования
 
-## exception в plain-формате
+## Дополнительные поля + несколько логеров
 ```python
-from logger_config import logger
+from logger_config import general_logger, requests_logger, debug_logger
+import random
 
 def foo():
+    requests_logger.info("Got request", extra={"user":"maintainer", "random": random.random()})
+
+    # emulate super important actions
+    m = random.randint(1, 6)
+    debug_logger.debug(f"Request had number: {m}")
+    a = 1 / 0
+
+if __name__ == '__main__':
+    general_logger.info("Script started.")
     try:
-        1 / 0
-    except ZeroDivisionError:
-        logger.exception("Ошибка", exc_info=True)
-
-if __name__ == '__main__':
-    foo()
-```
-
-### Вывод
-```
-2025-03-07 21:24:38,931 - mse1h2025-rocket0 - ERROR - Ошибка
-Traceback (most recent call last):
-  File "C:\Users\wwwod\PycharmProjects\mse1h2025-rocket0\snippet.py", line 5, in foo
-    1 / 0
-    ~~^~~
-ZeroDivisionError: division by zero
-```
-
-## info, error в plain-формате
-```python
-from logger_config import logger
-import random
-
-def foo():
-    logger.info("Test")
-    if random.randint(0, 2) == 1:
-        logger.error("You have a lucky error")
-
-if __name__ == '__main__':
-    logger.debug("Script started.")
-    foo()
-    logger.debug("Script finished.")
+        foo()
+    except Exception as e:
+        general_logger.error(e, exc_info=True)
+    general_logger.info("Script finished.")
 ```
 
 ### Консоль
-```
-2025-03-07 21:29:20,056 - mse1h2025-rocket0 - INFO - Test
-2025-03-07 21:29:20,056 - mse1h2025-rocket0 - ERROR - You have a lucky error
-```
-
-### Файл
-```
-2025-03-07 21:29:20,055 - mse1h2025-rocket0 - DEBUG - Script started.
-2025-03-07 21:29:20,056 - mse1h2025-rocket0 - INFO - Test
-2025-03-07 21:29:20,056 - mse1h2025-rocket0 - ERROR - You have a lucky error
-2025-03-07 21:29:20,056 - mse1h2025-rocket0 - DEBUG - Script finished.
-```
-
-## json-формат с дополнительными полями
-```python
-from logger_config import logger
-import random
-
-def foo():
-    logger.info("Test", extra={"user":"maintainer", "random": random.random()})
-
-if __name__ == '__main__':
-    logger.debug("Script started.")
-    foo()
-    logger.debug("Script finished.")
-```
-
-### Консоль
-```json
-{"timestamp": "2025-03-07 21:44:07,043", "name": "mse1h2025-rocket0", "level": "INFO", "msg": "Test", "user": "maintainer", "random": 0.8825765114447546}
-```
-
-### Файл
 ```json lines
-{"timestamp": "2025-03-07 21:44:07,043", "name": "mse1h2025-rocket0", "level": "DEBUG", "msg": "Script started."}
-{"timestamp": "2025-03-07 21:44:07,043", "name": "mse1h2025-rocket0", "level": "INFO", "msg": "Test", "user": "maintainer", "random": 0.8825765114447546}
-{"timestamp": "2025-03-07 21:44:07,044", "name": "mse1h2025-rocket0", "level": "DEBUG", "msg": "Script finished."}
+{"timestamp": "2025-03-07 22:21:19,554", "name": "general", "level": "INFO", "msg": "Script started."}
+{"timestamp": "2025-03-07 22:21:19,554", "name": "debug", "level": "DEBUG", "msg": "Request had number: 6"}
+{"timestamp": "2025-03-07 22:21:19,554", "name": "general", "level": "ERROR", "msg": "division by zero", "exc_info": "Traceback (most recent call last):\n  File \"C:\\Users\\wwwod\\PycharmProjects\\mse1h2025-rocket0\\snippet.py\", line 15, in <module>\n    foo()\n    ~~~^^\n  File \"C:\\Users\\wwwod\\PycharmProjects\\mse1h2025-rocket0\\snippet.py\", line 10, in foo\n    a = 1 / 0\n        ~~^~~\nZeroDivisionError: division by zero"}
+{"timestamp": "2025-03-07 22:21:19,556", "name": "general", "level": "INFO", "msg": "Script finished."}
+```
+
+### Файл requests.log
+```json
+{"timestamp": "2025-03-07 22:21:19,554", "name": "requests", "level": "INFO", "msg": "Got request", "user": "maintainer", "random": 0.7549071001025663}
 ```

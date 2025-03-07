@@ -1,10 +1,18 @@
-from logger_config import logger
+from logger_config import general_logger, requests_logger, debug_logger
 import random
 
 def foo():
-    logger.info("Test", extra={"user":"maintainer", "random": random.random()})
+    requests_logger.info("Got request", extra={"user":"maintainer", "random": random.random()})
+
+    # emulate super important actions
+    m = random.randint(1, 6)
+    debug_logger.debug(f"Request had number: {m}")
+    a = 1 / 0
 
 if __name__ == '__main__':
-    logger.debug("Script started.")
-    foo()
-    logger.debug("Script finished.")
+    general_logger.info("Script started.")
+    try:
+        foo()
+    except Exception as e:
+        general_logger.error(e, exc_info=True)
+    general_logger.info("Script finished.")
