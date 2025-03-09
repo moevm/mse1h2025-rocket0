@@ -6,7 +6,7 @@ class ChatMessageSender:
     id: str
     username: str
 
- 
+
 @dataclass
 class ChatMessage:
     id: str

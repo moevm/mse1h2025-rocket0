@@ -17,7 +17,7 @@ class FindUnansweredHandler(ApplicationHandler):
 
     async def handle(self, bot: Bot, ctx: RequestContext, input: FindUnansweredArgs) -> None:
         messages = await self._group_service.get_unanswered_messages(bot, ctx, input.from_date, input.to_date)
-        
+
         response_blocks: list[str] = [
             f"[ ](http://{self._server_url}/group/{message.rid}?msg={message.id})\n"
             for message in messages
@@ -26,7 +26,7 @@ class FindUnansweredHandler(ApplicationHandler):
         if len(response_blocks) == 0:
             await bot.send_message("Неотвеченных сообщений не найдено", ctx.channel_id, ctx.thread_id)
             return
-        
+
         await bot.send_message(
             f'{"".join(response_blocks)}\nКоличество неотвеченных сообщений: {len(response_blocks)}',
             ctx.channel_id,

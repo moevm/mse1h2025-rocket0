@@ -26,18 +26,18 @@ class GroupService:
 
             unanswered: dict[str, ChatMessage] = {}
             answered: set[str] = set()
-    
+
             for message in messages:
                 message_id = message["_id"]
                 if "t" in message:
                     continue
-                
+
                 sender_id = message["u"]["_id"]
                 '''
                 if sender_id == ctx.sender_id:
                     continue
                 '''
-                
+
                 if sender_id == bot.id:
                     continue
 
@@ -45,15 +45,15 @@ class GroupService:
                     answered.add(message["tmid"])
                     unanswered.pop(message["tmid"], None)
                     continue
-                
+
                 if message_id not in answered:
                     unanswered[message_id] = ChatMessage(
-                        id=message_id, 
-                        rid=message["rid"], 
+                        id=message_id,
+                        rid=message["rid"],
                         msg=message["msg"],
                         u=ChatMessageSender(id=sender_id, username=message["u"]["username"])
                     )
-            
+
             result.extend(list(unanswered.values()))
-        
+
         return result
