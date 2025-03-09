@@ -33,9 +33,11 @@ class GroupService:
                     continue
                 
                 sender_id = message["u"]["_id"]
+                '''
                 if sender_id == ctx.sender_id:
                     continue
-
+                '''
+                
                 if sender_id == bot.id:
                     continue
 
