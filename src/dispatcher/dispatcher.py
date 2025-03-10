@@ -27,6 +27,7 @@ class Dispatcher:
         await asyncio.gather(*polling_task)
 
     def dispatch(self, *args) -> None:
+        print(args, flush=True)
         try:
             ctx = RequestContext(
                 bot_local_id=args[0],
@@ -40,6 +41,7 @@ class Dispatcher:
                 unread=args[8],
                 repeated=args[9],
             )
+
         except ValidationError as e:
             print(f"Cannot parse request: {e}", flush=True)
             return
