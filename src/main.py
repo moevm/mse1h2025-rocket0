@@ -1,9 +1,10 @@
 from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser
 from handler.filters import CommandFilter
-from application.handlers import TimeCommandHandler
+from application.handlers import TimeCommandHandler, FindUnansweredHandler
+from application.services import GroupService
 from models.enums import Command
-from models.dto import NoArgs
+from models.dto import NoArgs, FindUnansweredArgs
 import asyncio
 import os
 
@@ -14,13 +15,19 @@ PASSWORD = os.getenv('ROCKET_CHAT_PASSWORD')
 
 
 def register_handlers(bot: Bot) -> None:
-    timeHandler = TimeCommandHandler()
-    bot.register_handler(timeHandler.handle, NoArgs, filters=[CommandFilter(Command.TIME)])
+    time_handler = TimeCommandHandler()
+    bot.register_handler(time_handler.handle, NoArgs, filters=[CommandFilter(Command.TIME)])
+
+    # здесь урла хардкодится, но в будущем можно будет прокидывать переменную окружения
+    group_service = GroupService()
+    find_unanswered_handler = FindUnansweredHandler("localhost:3000", group_service)
+    bot.register_handler(find_unanswered_handler.handle, FindUnansweredArgs, filters=[CommandFilter(Command.FIND_UNANSWERED)])
 
 
 def prepare_dispatcher(bots: list[Bot]) -> Dispatcher:
     parser = ChatCommandParser({
         "time": Command.TIME,
+        "find_unanswered": Command.FIND_UNANSWERED,
     })
 
     dp = Dispatcher(bots, parser)
