@@ -3,7 +3,7 @@ import os
 from logging.handlers import RotatingFileHandler
 from pythonjsonlogger import json
 
-LOG_DIR = "logs"
+LOG_DIR = "../logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
 

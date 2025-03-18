@@ -1,17 +1,20 @@
 # Примеры логирования
 
 ## Дополнительные поля + несколько логеров
+
 ```python
-from logger_config import general_logger, requests_logger, debug_logger
+from src.logger_config import general_logger, requests_logger, debug_logger
 import random
 
+
 def foo():
-    requests_logger.info("Got request", extra={"user":"maintainer", "random": random.random()})
+    requests_logger.info("Got request", extra={"user": "maintainer", "random": random.random()})
 
     # emulate super important actions
     m = random.randint(1, 6)
     debug_logger.debug(f"Request had number: {m}")
     a = 1 / 0
+
 
 if __name__ == '__main__':
     general_logger.info("Script started.")
