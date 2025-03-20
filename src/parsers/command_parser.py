@@ -14,6 +14,7 @@ class ChatCommandParser(CommandParser):
     def __init__(self, commands_map: dict[str, Command], prefix: str = "!") -> None:
         self._prefix = prefix
         self._commands_map = {k.lower(): v for k, v in commands_map.items()}
+        self._commands_map["stats"] = Command.STATS
 
     def parse(self, ctx: RequestContext) -> tuple[Command | None, dict[str, Any] | None]:
         msg = ctx.msg.strip()
