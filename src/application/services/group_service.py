@@ -36,12 +36,9 @@ class GroupService:
                 if "t" in message:
                     continue
 
-<<<<<<< Updated upstream
-=======
                 if message["msg"].startswith(self._prefix):
                     continue
 
->>>>>>> Stashed changes
                 sender_id = message["u"]["_id"]
                 '''
                 if sender_id == ctx.sender_id:
