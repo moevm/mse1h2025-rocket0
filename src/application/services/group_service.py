@@ -9,12 +9,16 @@ GROUP_TYPE = "p"
 
 
 class GroupService:
+    def __init__(self, prefix):
+        # префикс команд (чтобы игнорировать сообщения с ним)
+        self._prefix = prefix
+
     async def get_unanswered_messages(
         self,
         bot: Bot,
         ctx: RequestContext,
         from_date: datetime = None,
-        to_date: datetime = None
+        to_date: datetime = None,
     ) -> list[ChatMessage]:
         groups = list(filter(lambda chan: chan["t"] == GROUP_TYPE, await bot.get_channels()))
         result: list[ChatMessage] = []
@@ -32,6 +36,12 @@ class GroupService:
                 if "t" in message:
                     continue
 
+<<<<<<< Updated upstream
+=======
+                if message["msg"].startswith(self._prefix):
+                    continue
+
+>>>>>>> Stashed changes
                 sender_id = message["u"]["_id"]
                 '''
                 if sender_id == ctx.sender_id:
