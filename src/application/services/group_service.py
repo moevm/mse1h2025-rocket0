@@ -9,9 +9,8 @@ GROUP_TYPE = "p"
 
 
 class GroupService:
-    def __init__(self, prefix):
-        # префикс команд (чтобы игнорировать сообщения с ним)
-        self._prefix = prefix
+    def __init__(self, command_prefix):
+        self._command_prefix = command_prefix
 
     async def get_unanswered_messages(
         self,
@@ -36,7 +35,7 @@ class GroupService:
                 if "t" in message:
                     continue
 
-                if message["msg"].startswith(self._prefix):
+                if message["msg"].startswith(self._command_prefix):
                     continue
 
                 sender_id = message["u"]["_id"]
