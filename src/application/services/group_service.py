@@ -9,12 +9,15 @@ GROUP_TYPE = "p"
 
 
 class GroupService:
+    def __init__(self, command_prefix):
+        self._command_prefix = command_prefix
+
     async def get_unanswered_messages(
         self,
         bot: Bot,
         ctx: RequestContext,
         from_date: datetime = None,
-        to_date: datetime = None
+        to_date: datetime = None,
     ) -> list[ChatMessage]:
         groups = list(filter(lambda chan: chan["t"] == GROUP_TYPE, await bot.get_channels()))
         result: list[ChatMessage] = []
@@ -30,6 +33,9 @@ class GroupService:
             for message in messages:
                 message_id = message["_id"]
                 if "t" in message:
+                    continue
+
+                if message["msg"].startswith(self._command_prefix):
                     continue
 
                 sender_id = message["u"]["_id"]
