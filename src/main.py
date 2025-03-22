@@ -10,11 +10,6 @@ import asyncio
 import os
 
 
-# SERVER_URL = os.getenv('ROCKET_CHAT_URL')
-# USERNAME = os.getenv('ROCKET_CHAT_USER')
-# PASSWORD = os.getenv('ROCKET_CHAT_PASSWORD')
-
-
 def register_handlers(bot: Bot) -> None:
     time_handler = TimeCommandHandler()
     bot.register_handler(time_handler.handle, NoArgs, filters=[CommandFilter(Command.TIME)])
