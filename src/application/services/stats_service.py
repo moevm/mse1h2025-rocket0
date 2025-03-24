@@ -1,8 +1,8 @@
 from datetime import datetime
+from typing import Optional
 from models.dto import RequestContext
 from dispatcher import Bot
-from typing import Optional
-from models.dto.stats_model import UserStats, ChannelStats, StatsData
+from models.domain.stats_model import UserStats, ChannelStats, StatsData
 
 
 class StatsService:
@@ -42,16 +42,24 @@ class StatsService:
                 if user_id not in users:
                     users[user_id] = UserStats()
 
-                users[user_id].messages += 1
-                channels[channel_id].messages += 1
+                users[user_id] = UserStats(
+                    messages=users[user_id].messages + 1,
+                    questions=users[user_id].questions +
+                    (1 if "?" in msg.get("msg", "") else 0),
+                    answers=users[user_id].answers +
+                    (1 if "tmid" in msg else 0),
+                    reactions_given=users[user_id].reactions_given,
+                    reactions_received=users[user_id].reactions_received
+                )
 
-                if "?" in msg.get("msg", ""):
-                    users[user_id].questions += 1
-                    channels[channel_id].questions += 1
-
-                if "tmid" in msg:
-                    users[user_id].answers += 1
-                    channels[channel_id].answers += 1
+                channels[channel_id] = ChannelStats(
+                    messages=channels[channel_id].messages + 1,
+                    questions=channels[channel_id].questions +
+                    (1 if "?" in msg.get("msg", "") else 0),
+                    answers=channels[channel_id].answers +
+                    (1 if "tmid" in msg else 0),
+                    reactions=channels[channel_id].reactions
+                )
 
         return StatsData(
             users=users,

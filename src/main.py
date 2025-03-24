@@ -9,7 +9,7 @@ import asyncio
 import os
 from application.handlers.stats_handler import StatsHandler
 from application.services.stats_service import StatsService
-from models.dto.stats_args import StatsArgs
+from models.dto.stats import StatsArgs
 
 SERVER_URL = os.getenv('ROCKET_CHAT_URL')
 USERNAME = os.getenv('ROCKET_CHAT_USER')

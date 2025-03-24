@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 
-class UserStats(BaseModel):
+@dataclass
+class UserStats:
     messages: int = 0
     questions: int = 0
     answers: int = 0
@@ -9,14 +10,16 @@ class UserStats(BaseModel):
     reactions_received: int = 0
 
 
-class ChannelStats(BaseModel):
+@dataclass
+class ChannelStats:
     messages: int = 0
     questions: int = 0
     answers: int = 0
     reactions: int = 0
 
 
-class StatsData(BaseModel):
+@dataclass
+class StatsData:
     users: dict[str, UserStats]
     channels: dict[str, ChannelStats]
     user_names: dict[str, str]
