@@ -7,10 +7,8 @@ from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs
 import asyncio
 import os
-
 from application.handlers.stats_handler import StatsHandler
 from application.services.stats_service import StatsService
-
 from models.dto.stats_args import StatsArgs
 
 SERVER_URL = os.getenv('ROCKET_CHAT_URL')

@@ -1,10 +1,8 @@
 from datetime import datetime
-
-
 from models.dto import RequestContext
 from dispatcher import Bot
-
-from typing import Dict
+from typing import Optional
+from models.dto.stats_model import UserStats, ChannelStats, StatsData
 
 
 class StatsService:
@@ -12,92 +10,52 @@ class StatsService:
         self,
         bot: Bot,
         ctx: RequestContext,
-        from_date: datetime = None,
-        to_date: datetime = None
-    ) -> str:
+        from_date: Optional[datetime] = None,
+        to_date: Optional[datetime] = None
+    ) -> StatsData:
+        users: dict[str, UserStats] = {}
+        channels: dict[str, ChannelStats] = {}
+        user_names: dict[str, str] = {}
+        channel_names: dict[str, str] = {}
 
-        user_stats: Dict[str, Dict[str, int]] = {}
-        channel_stats: Dict[str, Dict[str, int]] = {}
+        raw_channels = await bot.get_channels()
+        channel_names = {c["_id"]: c.get("name", "Unknown")
+                         for c in raw_channels}
 
-        channels = await bot.get_channels()
-        channel_info = {channel["_id"]: channel.get(
-            "name", "Unknown") for channel in channels}
-
-        user_info = {}
-        for channel in channels:
-            history_data = bot.get_group_history(channel["_id"])
-            messages = history_data.get("messages", [])
-            for msg in messages:
-                if "u" in msg:
-                    user_id = msg["u"]["_id"]
-                    if user_id not in user_info:
-                        user_info[user_id] = msg["u"].get(
-                            "username", "Unknown")
-
-        for channel in channels:
+        for channel in raw_channels:
             channel_id = channel["_id"]
 
-            history_data = bot.get_group_history(channel_id)
-            messages = history_data.get("messages", [])
+            if channel_id not in channels:
+                channels[channel_id] = ChannelStats()
 
-            for msg in messages:
-
+            history = bot.get_group_history(channel_id)
+            for msg in history.get("messages", []):
                 if "t" in msg:
                     continue
 
-                sender_id = msg["u"]["_id"]
+                user = msg["u"]
+                user_id = user["_id"]
 
-                if sender_id not in user_stats:
-                    user_stats[sender_id] = {
-                        "messages": 0,
-                        "questions": 0,
-                        "answers": 0,
-                        "reactions_given": 0,
-                        "reactions_received": 0,
-                    }
+                if user_id not in user_names:
+                    user_names[user_id] = user.get("username", "Unknown")
 
-                user_stats[sender_id]["messages"] += 1
+                if user_id not in users:
+                    users[user_id] = UserStats()
+
+                users[user_id].messages += 1
+                channels[channel_id].messages += 1
 
                 if "?" in msg.get("msg", ""):
-                    user_stats[sender_id]["questions"] += 1
+                    users[user_id].questions += 1
+                    channels[channel_id].questions += 1
 
                 if "tmid" in msg:
-                    user_stats[sender_id]["answers"] += 1
+                    users[user_id].answers += 1
+                    channels[channel_id].answers += 1
 
-                if channel_id not in channel_stats:
-                    channel_stats[channel_id] = {
-                        "messages": 0,
-                        "questions": 0,
-                        "answers": 0,
-                        "reactions": 0,
-                    }
-                channel_stats[channel_id]["messages"] += 1
-                if "?" in msg.get("msg", ""):
-                    channel_stats[channel_id]["questions"] += 1
-                if "tmid" in msg:
-                    channel_stats[channel_id]["answers"] += 1
-
-        message = "Статистика пользователей:\n"
-        for user_id, stats in user_stats.items():
-            username = user_info.get(user_id, "Unknown")
-            message += (
-                f"- Пользователь {username} ({user_id}):\n"
-                f"  Сообщений: {stats['messages']}\n"
-                f"  Вопросов: {stats['questions']}\n"
-                f"  Ответов: {stats['answers']}\n"
-                f"  Поставлено реакций: {stats['reactions_given']}\n"
-                f"  Получено реакций: {stats['reactions_received']}\n"
-            )
-
-        message += "\nСтатистика по каналам:\n"
-        for channel_id, stats in channel_stats.items():
-            channel_name = channel_info.get(channel_id, "Unknown")
-            message += (
-                f"- Канал {channel_name} ({channel_id}):\n"
-                f"  Сообщений: {stats['messages']}\n"
-                f"  Вопросов: {stats['questions']}\n"
-                f"  Ответов: {stats['answers']}\n"
-                f"  Реакций: {stats['reactions']}\n"
-            )
-
-        return message
+        return StatsData(
+            users=users,
+            channels=channels,
+            user_names=user_names,
+            channel_names=channel_names
+        )
