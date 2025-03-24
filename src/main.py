@@ -5,22 +5,18 @@ from application.handlers import TimeCommandHandler, FindUnansweredHandler
 from application.services import GroupService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs
+from config import Config
 import asyncio
 import os
-
-
-SERVER_URL = os.getenv('ROCKET_CHAT_URL')
-USERNAME = os.getenv('ROCKET_CHAT_USER')
-PASSWORD = os.getenv('ROCKET_CHAT_PASSWORD')
 
 
 def register_handlers(bot: Bot) -> None:
     time_handler = TimeCommandHandler()
     bot.register_handler(time_handler.handle, NoArgs, filters=[CommandFilter(Command.TIME)])
 
-    # здесь урла хардкодится, но в будущем можно будет прокидывать переменную окружения
-    group_service = GroupService()
-    find_unanswered_handler = FindUnansweredHandler("localhost:3000", group_service)
+    group_service = GroupService(config.command_prefix)
+    find_unanswered_handler = FindUnansweredHandler(config.user_server_url, group_service)
+    
     bot.register_handler(find_unanswered_handler.handle, FindUnansweredArgs, filters=[CommandFilter(Command.FIND_UNANSWERED)])
 
 
@@ -28,15 +24,17 @@ def prepare_dispatcher(bots: list[Bot]) -> Dispatcher:
     parser = ChatCommandParser({
         "time": Command.TIME,
         "find_unanswered": Command.FIND_UNANSWERED,
-    })
-
+    }, 
+    config.command_prefix)
+    
     dp = Dispatcher(bots, parser)
 
     return dp
 
 
 if __name__ == '__main__':
-    bot = Bot(SERVER_URL, USERNAME, PASSWORD)
+    config = Config()
+    bot = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password)
     register_handlers(bot)
 
     dp = prepare_dispatcher([bot])
