@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Optional
 from models.dto import RequestContext
+from models.domain import UserStats, ChannelStats, StatsData
 from dispatcher import Bot
-from models.domain.stats_model import UserStats, ChannelStats, StatsData
 
 
 class StatsService:
@@ -10,8 +9,8 @@ class StatsService:
         self,
         bot: Bot,
         ctx: RequestContext,
-        from_date: Optional[datetime] = None,
-        to_date: Optional[datetime] = None
+        from_date: datetime | None = None,
+        to_date: datetime | None = None
     ) -> StatsData:
         users: dict[str, UserStats] = {}
         channels: dict[str, ChannelStats] = {}

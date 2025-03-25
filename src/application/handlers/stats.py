@@ -1,10 +1,10 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
-from models.dto import RequestContext
-from models.dto.stats import StatsArgs
+from models.dto import RequestContext, StatsArgs
+from models.domain import StatsData
 from application.handlers.interface import ApplicationHandler
-from application.services.stats_service import StatsService
-from models.domain.stats_model import StatsData
+from application.services import StatsService
 
 if TYPE_CHECKING:
     from dispatcher.bot import Bot
