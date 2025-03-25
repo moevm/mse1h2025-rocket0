@@ -30,6 +30,7 @@ def setup_logger(name: str, level: int = logging.INFO, to_console: bool = False,
 
     return logger
 
+
 general_logger = setup_logger("general", logging.INFO, to_console=True)
 requests_logger = setup_logger("requests", logging.INFO, to_file="requests.log")
 debug_logger = setup_logger("debug", logging.DEBUG, to_console=True)
