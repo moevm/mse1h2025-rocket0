@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check commits
+
+      - name: Check branch name
+        id: check_branch
+        run: |
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          if [[ "$BRANCH_NAME" == *"reports"* ]]; then
+            echo "Skipping CI for your branch: $BRANCH_NAME"
+            exit 1
+          fi
+
+      - name: Run chat
+        run: |
+          make chat-compose-up
+
+      - name: Run bot
+        run: |
+          make bot-compose-up
