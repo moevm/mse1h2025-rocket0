@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from dataclasses import dataclass, field
 from typing import Callable, TYPE_CHECKING
 from pydantic import BaseModel, ValidationError
@@ -12,8 +13,7 @@ if TYPE_CHECKING:
     from models.dto import RequestContext
 
 
-type CallbackType[T: BaseModel] = Callable[[Bot, RequestContext, T], None]
-
+type CallbackType[T:BaseModel] = Callable[[Bot, RequestContext, T], Awaitable[None]]
 
 @dataclass
 class Handler[T: BaseModel]:

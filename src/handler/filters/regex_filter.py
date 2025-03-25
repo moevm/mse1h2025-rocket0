@@ -9,4 +9,4 @@ class RegexFilter(HandlerFilter):
         self._expression = re.compile(expression) if isinstance(expression, str) else expression
 
     def check(self, ctx: RequestContext) -> bool:
-        return bool(re.match(self._expression, ctx.msg))
+        return bool(re.fullmatch(self._expression, ctx.msg))

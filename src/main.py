@@ -1,7 +1,7 @@
 from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser
-from handler.filters import CommandFilter
-from application.handlers import TimeCommandHandler, FindUnansweredHandler
+from handler.filters import CommandFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
+from application.handlers import TimeCommandHandler, FindUnansweredHandler, QuestionHandler
 from application.services import GroupService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs
@@ -17,9 +17,14 @@ def register_handlers(bot: Bot) -> None:
 
     group_service = GroupService(config.command_prefix)
     find_unanswered_handler = FindUnansweredHandler(config.user_server_url, group_service)
+    question_handler = QuestionHandler()
 
     bot.register_handler(find_unanswered_handler.handle, FindUnansweredArgs,
                          filters=[CommandFilter(Command.FIND_UNANSWERED)])
+
+    # Должен регистрироваться после всех команд
+    bot.register_handler(question_handler.handle, NoArgs,
+                         filters=[RegexFilter(r'.*\?.*'), NonRepeatedFilter(), NoThreadFilter()])
 
 
 def prepare_dispatcher(bots: list[Bot]) -> Dispatcher:
