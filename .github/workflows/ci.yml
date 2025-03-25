@@ -3,10 +3,12 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - '*'
+      - '!*reports*'
   pull_request:
     branches:
-      - main
+      - '*'
+      - '!*reports*'
 
 jobs:
   build:
