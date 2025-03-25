@@ -48,10 +48,10 @@ class ChatCommandParser(CommandParser):
         command = self._extract_command(str_command)
         if command is None:
             return None, None
-        
+
         if not self._commands_map[str_command].schema:
             return command, None
-        
+
         try:
             args = self._extract_args(tokens[1:], self._commands_map[str_command].schema)
         except CommandParserException as e:
@@ -67,35 +67,35 @@ class ChatCommandParser(CommandParser):
 
     def _extract_args(self, tokens: list[str], sсhema: dict[str, ArgSchema]) -> dict[str, Any]:
         parser = argparse.ArgumentParser(prog="command", add_help=False)
-        
-        for arg_name, arg_sсhema in sсhema.items(): 
+
+        for arg_name, arg_sсhema in sсhema.items():
             flag = f"--{arg_name}"
             kwargs = {'required': False, 'dest': arg_name}
-            
+
             if arg_sсhema.type == bool:
                 kwargs['action'] = 'store_true'
             else:
                 kwargs['type'] = lambda val, t=arg_sсhema.type, n=arg_name: self._convert_type(val, t, n)
-                
+
             if arg_sсhema.default is not None:
                 kwargs['default'] = arg_sсhema.default
-                
+
             if arg_sсhema.required:
                 kwargs['required'] = True
-                
+
             if arg_sсhema.nargs is not None:
                 kwargs['nargs'] = arg_sсhema.nargs
-                
+
             parser.add_argument(flag, **kwargs)
-            
+
         try:
             args_namespace, _ = parser.parse_known_args(tokens)
             args = vars(args_namespace)
         except SystemExit:
             raise CommandParserException("Невозможно распарсить аргументы команды")
-        
+
         return args
-        
+
     def _convert_type(self, value: str, expected_type: type, arg_name: str) -> Any:
         try:
             if expected_type == datetime:
