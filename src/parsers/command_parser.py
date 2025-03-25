@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Any
-from models.dto import RequestContext, ArgSchema, CommandInfo
+from models.dto import RequestContext
 from models.enums import Command
+from parsers.arg_schema import ArgSchema
+from parsers.command_info import CommandInfo
 import argparse
 from datetime import datetime
 
@@ -46,7 +48,7 @@ class ChatCommandParser(CommandParser):
 
     def _extract_command(self, str_command: str) -> Command:
         if str_command not in self._commands_map:
-            return None, None
+            return None
 
         return self._commands_map[str_command].cmd
 
@@ -82,13 +84,10 @@ class ChatCommandParser(CommandParser):
         return args
         
     def _convert_type(self, value: str, expected_type: type, arg_name: str) -> Any:
-        if expected_type == datetime:
-            try:
-                date = datetime.strptime(value, "%d-%m-%Y")
-                return date
-            except ValueError:
-                raise CommandParserException(f"Аргумент --{arg_name} должен иметь тип {expected_type.__name__} в формате дд-мм-гггг")
         try:
+            if expected_type == datetime:
+                date = datetime.fromisoformat(value)
+                return date
             return expected_type(value)
         except ValueError:
             raise CommandParserException(f"Аргумент --{arg_name} должен иметь тип {expected_type.__name__}")

@@ -1,10 +1,10 @@
 from dispatcher import Dispatcher, Bot
-from parsers import ChatCommandParser
+from parsers import ChatCommandParser, CommandInfo, ArgSchema
 from handler.filters import CommandFilter
 from application.handlers import TimeCommandHandler, FindUnansweredHandler
 from application.services import GroupService
 from models.enums import Command
-from models.dto import NoArgs, FindUnansweredArgs, CommandInfo, ArgSchema
+from models.dto import NoArgs, FindUnansweredArgs
 import asyncio
 import os
 from datetime import datetime
@@ -27,19 +27,19 @@ def register_handlers(bot: Bot) -> None:
 
 def prepare_dispatcher(bots: list[Bot]) -> Dispatcher:
     find_unanswered_schema = {
-        'hours': ArgSchema(int),
-        'from': ArgSchema(datetime),
-        'to': ArgSchema(datetime),
-        'short': ArgSchema(bool),
-        'channel': ArgSchema(str),
+        'hours': ArgSchema[int](int),
+        'from': ArgSchema[datetime](datetime),
+        'to': ArgSchema[datetime](datetime),
+        'short': ArgSchema[bool](bool, default=False),
+        'channels': ArgSchema[str](str, nargs='*'),
     }
     stats_schema = {
-        'hours': ArgSchema(int),
-        'from': ArgSchema(datetime),
-        'to': ArgSchema(datetime),
-        'channels': ArgSchema(str, nargs='*'),
-        'users': ArgSchema(str, nargs='*'),
-        'roles': ArgSchema(str, nargs='*'),
+        'hours': ArgSchema[int](int),
+        'from': ArgSchema[datetime](datetime),
+        'to': ArgSchema[datetime](datetime),
+        'channels': ArgSchema[str](str, nargs='*'),
+        'users': ArgSchema[str](str, nargs='*'),
+        'roles': ArgSchema[str](str, nargs='*'),
     }
     
     parser = ChatCommandParser({
