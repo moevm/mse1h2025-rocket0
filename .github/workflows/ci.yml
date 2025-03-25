@@ -29,13 +29,13 @@ jobs:
         run: |
           echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
           if [[ "$BRANCH_NAME" == *"reports"* ]]; then
-            echo "Skipping CI for branch: $BRANCH_NAME"
+            echo "Skipping CI for your branch: $BRANCH_NAME"
             exit 1
           fi
 
       - name: Run chat
         run: |
-          make chat-compose-up0
+          make chat-compose-up
 
       - name: Run bot
         run: |
