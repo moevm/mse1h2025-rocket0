@@ -23,9 +23,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-#      - name: Run chat
-#        run: |
-#          make chat-compose-up0
+      - name: Run chat
+        run: |
+          make chat-compose-up0
 
-#      - name: Run bot
-#          make chat-compose-up
+      - name: Run bot
+          make chat-compose-up
