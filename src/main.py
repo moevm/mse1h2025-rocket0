@@ -6,6 +6,7 @@ from application.services import GroupService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs
 from config import Config
+from logger_config import general_logger
 import asyncio
 import os
 
@@ -16,29 +17,30 @@ def register_handlers(bot: Bot) -> None:
 
     group_service = GroupService(config.command_prefix)
     find_unanswered_handler = FindUnansweredHandler(config.user_server_url, group_service)
-    
-    bot.register_handler(find_unanswered_handler.handle, FindUnansweredArgs, filters=[CommandFilter(Command.FIND_UNANSWERED)])
+
+    bot.register_handler(find_unanswered_handler.handle, FindUnansweredArgs,
+                         filters=[CommandFilter(Command.FIND_UNANSWERED)])
 
 
 def prepare_dispatcher(bots: list[Bot]) -> Dispatcher:
     parser = ChatCommandParser({
         "time": Command.TIME,
         "find_unanswered": Command.FIND_UNANSWERED,
-    }, 
-    config.command_prefix)
-    
-    dp = Dispatcher(bots, parser)
+    },
+        config.command_prefix)
 
-    return dp
+    dispatcher = Dispatcher(bots, parser)
+
+    return dispatcher
 
 
 if __name__ == '__main__':
     config = Config()
-    bot = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password)
-    register_handlers(bot)
+    b = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password)
+    register_handlers(b)
 
-    dp = prepare_dispatcher([bot])
+    dp = prepare_dispatcher([b])
     try:
         asyncio.run(dp.start_polling())
     except KeyboardInterrupt:
-        print('bot stopped')
+        general_logger.info('bot stopped')
