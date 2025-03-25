@@ -27,19 +27,19 @@ def register_handlers(bot: Bot) -> None:
 
 def prepare_dispatcher(bots: list[Bot]) -> Dispatcher:
     find_unanswered_schema = {
-        'hours': ArgSchema[int](int),
-        'from': ArgSchema[datetime](datetime),
-        'to': ArgSchema[datetime](datetime),
-        'short': ArgSchema[bool](bool, default=False),
-        'channels': ArgSchema[str](str, nargs='*'),
+        'hours': ArgSchema(int),
+        'from': ArgSchema(datetime),
+        'to': ArgSchema(datetime),
+        'short': ArgSchema(bool, default=False),
+        'channels': ArgSchema(str, nargs='*'),
     }
     stats_schema = {
-        'hours': ArgSchema[int](int),
-        'from': ArgSchema[datetime](datetime),
-        'to': ArgSchema[datetime](datetime),
-        'channels': ArgSchema[str](str, nargs='*'),
-        'users': ArgSchema[str](str, nargs='*'),
-        'roles': ArgSchema[str](str, nargs='*'),
+        'hours': ArgSchema(int),
+        'from': ArgSchema(datetime),
+        'to': ArgSchema(datetime),
+        'channels': ArgSchema(str, nargs='*'),
+        'users': ArgSchema(str, nargs='*'),
+        'roles': ArgSchema(str, nargs='*'),
     }
     
     parser = ChatCommandParser({

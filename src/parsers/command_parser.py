@@ -2,10 +2,23 @@ from abc import ABC, abstractmethod
 from typing import Any
 from models.dto import RequestContext
 from models.enums import Command
-from parsers.arg_schema import ArgSchema
-from parsers.command_info import CommandInfo
+from dataclasses import dataclass
 import argparse
 from datetime import datetime
+
+
+@dataclass
+class ArgSchema[T]:
+    type: type[T]
+    required: bool = False
+    default: T | None = None
+    nargs: str | None = None
+
+
+@dataclass
+class CommandInfo:
+    cmd: Command
+    schema: dict[str, ArgSchema] | None = None
 
 
 class CommandParserException(Exception):
