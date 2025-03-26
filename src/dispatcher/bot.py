@@ -60,7 +60,7 @@ class Bot[T: BaseModel]:
 
     async def resolve_handler(self, ctx: RequestContext) -> None:
         for handler in self._handlers:
-            if handler.check(ctx):
+            if handler.check(ctx, self):
                 await handler.handle(ctx)
 
     async def send_message(self, text: str, channel_id: str, thread_id: str | None = None) -> None:
