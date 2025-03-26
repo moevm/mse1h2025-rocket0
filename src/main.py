@@ -1,12 +1,13 @@
 from datetime import datetime
 from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser, CommandInfo, ArgSchema
-from handler.filters import CommandFilter
-from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler
+from handler.filters import CommandFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
+from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler
 from application.services import GroupService, StatsService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs, StatsArgs
 from config import Config
+from logger_config import general_logger
 import asyncio
 
 
@@ -22,6 +23,11 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
     find_unanswered_handler = FindUnansweredHandler(cfg.user_server_url, group_service)
 
     bot.register_handler(find_unanswered_handler.handle, FindUnansweredArgs, filters=[CommandFilter(Command.FIND_UNANSWERED)]) # noqa
+    
+    # Должен регистрироваться после всех команд
+    question_handler = QuestionHandler()
+    bot.register_handler(question_handler.handle, NoArgs,
+                         filters=[RegexFilter(r'.*\?.*'), NonRepeatedFilter(), NoThreadFilter()])
 
 
 def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
@@ -47,18 +53,18 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
         "stats": CommandInfo(Command.STATS, stats_schema),
     }, cfg.command_prefix)
 
-    dp = Dispatcher(bots, parser)
+    dispatcher = Dispatcher(bots, parser)
 
-    return dp
+    return dispatcher
 
 
 if __name__ == '__main__':
-    cfg = Config()
-    bot = Bot(cfg.rocket_chat_url, cfg.rocket_chat_user, cfg.rocket_chat_password)
-    register_handlers(bot, cfg)
+    config = Config()
+    b = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password)
+    register_handlers(b, config)
 
-    dp = prepare_dispatcher([bot], cfg)
+    dp = prepare_dispatcher([b], config)
     try:
         asyncio.run(dp.start_polling())
     except KeyboardInterrupt:
-        print('bot stopped')
+        general_logger.info('bot stopped')
