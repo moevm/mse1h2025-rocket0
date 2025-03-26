@@ -53,7 +53,7 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
         "stats": CommandInfo(Command.STATS, stats_schema),
     }, cfg.command_prefix)
 
-    dp = Dispatcher(bots, parser)
+    dispatcher = Dispatcher(bots, parser)
 
     return dispatcher
 
@@ -61,9 +61,9 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
 if __name__ == '__main__':
     config = Config()
     b = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password)
-    register_handlers(b)
+    register_handlers(b, config)
 
-    dp = prepare_dispatcher([b])
+    dp = prepare_dispatcher([b], config)
     try:
         asyncio.run(dp.start_polling())
     except KeyboardInterrupt:
