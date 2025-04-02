@@ -1,7 +1,6 @@
 from handler.filters.interface import HandlerFilter
 from models.dto import RequestContext
 from dispatcher import Bot
-from http import HTTPStatus
 
 
 class RoleFilter(HandlerFilter):
