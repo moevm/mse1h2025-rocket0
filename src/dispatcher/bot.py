@@ -87,10 +87,12 @@ class Bot[T: BaseModel]:
         return response.json()
     
     def get_roles(self, user_id: str = None, username: str = None) -> list[str] | None:
-        if user_id:
-            response = self.sync_client.users_info(user_id=user_id)
-        elif username:
-            response = self.sync_client.users_info(username=username)
+        if not (user_id or username):
+            return None
+        
+        response = self.sync_client.users_info(user_id=user_id, username=username)
         if response.status_code != HTTPStatus.OK:
-             return None
+            return None
+        
         return response.json().get("user", {}).get("roles", [])
+
