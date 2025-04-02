@@ -52,10 +52,7 @@ class ChatCommandParser(CommandParser):
         if not self._commands_map[str_command].schema:
             return command, None
 
-        try:
-            args = self._extract_args(tokens[1:], self._commands_map[str_command].schema)
-        except CommandParserException as e:
-            raise e
+        args = self._extract_args(tokens[1:], self._commands_map[str_command].schema)
 
         return command, args
 
@@ -92,7 +89,7 @@ class ChatCommandParser(CommandParser):
             args_namespace, _ = parser.parse_known_args(tokens)
             args = vars(args_namespace)
         except SystemExit:
-            raise CommandParserException("Невозможно распарсить аргументы команды")
+            raise CommandParserException("Cannot parse command arguments")
 
         return args
 
@@ -103,4 +100,4 @@ class ChatCommandParser(CommandParser):
                 return date
             return expected_type(value)
         except ValueError:
-            raise CommandParserException(f"Аргумент --{arg_name} должен иметь тип {expected_type.__name__}")
+            raise CommandParserException(f"Arg `--{arg_name}` must be type of `{expected_type.__name__}`")

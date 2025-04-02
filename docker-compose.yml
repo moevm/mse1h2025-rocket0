@@ -1,6 +1,8 @@
 volumes:
   mongodb_data:
     driver: local
+  app_logs:
+    driver: local
 
 
 services:
@@ -13,8 +15,9 @@ services:
       ROCKET_CHAT_PASSWORD: ${ROCKET_CHAT_PASSWORD}
       ROCKET_CHAT_URL: ${ROCKET_CHAT_URL}
       MONGO_URL_FOR_APP: ${MONGO_URL_FOR_APP}
+      ENV_TYPE: ${ENV_TYPE}
     volumes:
-      - ./logs:/logs
+      - app_logs:/logs
     depends_on:
       - mongodb
   
@@ -22,5 +25,3 @@ services:
     image: mongo:8.0
     volumes:
       - mongodb_data:/data/db
-    ports:
-      - "27017:27017" 
