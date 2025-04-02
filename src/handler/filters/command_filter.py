@@ -8,8 +8,5 @@ class CommandFilter(HandlerFilter):
     def __init__(self, cmd: Command) -> None:
         self._cmd = cmd
 
-    def check(self, ctx: RequestContext, bot: Bot) -> bool:
-        if ctx.cmd is not None and ctx.cmd == self._cmd:
-            return True
-
-        return False
+    def check(self, ctx: RequestContext) -> bool:
+        return ctx.cmd is not None and ctx.cmd == self._cmd
