@@ -12,7 +12,8 @@ class StatsService:
         from_date: datetime | None = None,
         to_date: datetime | None = None,
         channel_list: list[str] | None = None,
-        user_list: list[str] | None = None
+        user_list: list[str] | None = None,
+        role_list: list[str] | None = None
     ) -> StatsData:
         users: dict[str, UserStats] = {}
         channels: dict[str, ChannelStats] = {}
@@ -68,19 +69,60 @@ class StatsService:
                     reactions=channels[channel_id].reactions
                 )
 
-        # Фильтруем пользователей, если user_list предоставлен
         final_users = users
         final_user_names = user_names
+        
+        collected_user_ids = list(final_user_names.keys())
+        user_roles: dict[str, list[str]] = {}
+        if collected_user_ids:
+            user_roles = await bot.get_user_roles(collected_user_ids)
+
+        target_user_ids: set[str] | None = None
+
         if user_list:
-            # Находим ID пользователей, чьи имена есть в user_list
-            target_user_ids = {uid for uid, name in user_names.items() if name in user_list}
-            # Оставляем только статистику и имена для целевых пользователей
+            user_ids_by_name = {uid for uid, name in user_names.items() if name in user_list}
+            target_user_ids = user_ids_by_name
+        
+        if role_list:
+            role_list_lower = {r.lower() for r in role_list}
+            user_ids_by_role = {uid for uid, roles in user_roles.items() if any(role.lower() in role_list_lower for role in roles)}
+            if target_user_ids is None:
+                target_user_ids = user_ids_by_role
+            else:
+                target_user_ids.intersection_update(user_ids_by_role)
+
+        if target_user_ids is not None:
             final_users = {uid: stats for uid, stats in users.items() if uid in target_user_ids}
             final_user_names = {uid: name for uid, name in user_names.items() if uid in target_user_ids}
+            
+            # Пересчитываем статистику каналов ТОЛЬКО для отфильтрованных пользователей
+            final_channels: dict[str, ChannelStats] = {}
+            for channel in target_channels:
+                channel_id = channel["_id"]
+                final_channels[channel_id] = ChannelStats() 
+                
+                history = bot.get_group_history(channel_id) 
+                for msg in history.get("messages", []):
+                    if "t" in msg:
+                        continue
+                    
+                    msg_user_id = msg["u"]["_id"]
+                    if msg_user_id in target_user_ids: 
+                        final_channels[channel_id] = ChannelStats(
+                            messages=final_channels[channel_id].messages + 1,
+                            questions=final_channels[channel_id].questions +
+                            (1 if "?" in msg.get("msg", "") else 0),
+                            answers=final_channels[channel_id].answers +
+                            (1 if "tmid" in msg else 0),
+                            reactions=0
+                        )
+        else:
+            final_channels = channels
 
         return StatsData(
-            users=final_users, # Возвращаем отфильтрованных пользователей
-            channels=channels,
-            user_names=final_user_names, # Возвращаем отфильтрованные имена
-            channel_names=channel_names
+            users=final_users,
+            channels=final_channels,
+            user_names=final_user_names,
+            channel_names=channel_names,
+            user_roles=user_roles
         )

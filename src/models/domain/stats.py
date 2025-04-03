@@ -24,3 +24,4 @@ class StatsData:
     channels: dict[str, ChannelStats]
     user_names: dict[str, str]
     channel_names: dict[str, str]
+    user_roles: dict[str, list[str]]
