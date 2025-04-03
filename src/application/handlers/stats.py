@@ -15,7 +15,7 @@ class StatsHandler(ApplicationHandler):
         self._stats_service = stats_service
 
     async def handle(self, bot: "Bot", ctx: RequestContext, input: StatsArgs) -> None:
-        stats = await self._stats_service.collect_stats(bot, ctx, input.from_date, input.to_date)
+        stats = await self._stats_service.collect_stats(bot, ctx, input.from_date, input.to_date, input.channels)
         response = self._format_response(stats)
         await bot.send_message(response, ctx.channel_id, ctx.thread_id)
 

@@ -10,7 +10,8 @@ class StatsService:
         bot: Bot,
         ctx: RequestContext,
         from_date: datetime | None = None,
-        to_date: datetime | None = None
+        to_date: datetime | None = None,
+        channel_list: list[str] | None = None
     ) -> StatsData:
         users: dict[str, UserStats] = {}
         channels: dict[str, ChannelStats] = {}
@@ -21,7 +22,13 @@ class StatsService:
         channel_names = {c["_id"]: c.get("name", "Unknown")
                          for c in raw_channels}
 
-        for channel in raw_channels:
+        target_channels = raw_channels
+
+        if channel_list:
+            target_channels = [ch for ch in raw_channels if ch.get("name") in channel_list]
+            channel_names = {c["_id"]: c.get("name", "Unknown") for c in target_channels}
+
+        for channel in target_channels:
             channel_id = channel["_id"]
 
             if channel_id not in channels:
