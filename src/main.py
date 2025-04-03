@@ -42,6 +42,7 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
         'from': ArgSchema(datetime),
         'to': ArgSchema(datetime),
         'channels': ArgSchema(str, nargs='*'),
+        'users': ArgSchema(str, nargs='*'),
     }
 
     parser = ChatCommandParser({

@@ -11,7 +11,8 @@ class StatsService:
         ctx: RequestContext,
         from_date: datetime | None = None,
         to_date: datetime | None = None,
-        channel_list: list[str] | None = None
+        channel_list: list[str] | None = None,
+        user_list: list[str] | None = None
     ) -> StatsData:
         users: dict[str, UserStats] = {}
         channels: dict[str, ChannelStats] = {}
@@ -67,9 +68,19 @@ class StatsService:
                     reactions=channels[channel_id].reactions
                 )
 
+        # Фильтруем пользователей, если user_list предоставлен
+        final_users = users
+        final_user_names = user_names
+        if user_list:
+            # Находим ID пользователей, чьи имена есть в user_list
+            target_user_ids = {uid for uid, name in user_names.items() if name in user_list}
+            # Оставляем только статистику и имена для целевых пользователей
+            final_users = {uid: stats for uid, stats in users.items() if uid in target_user_ids}
+            final_user_names = {uid: name for uid, name in user_names.items() if uid in target_user_ids}
+
         return StatsData(
-            users=users,
+            users=final_users, # Возвращаем отфильтрованных пользователей
             channels=channels,
-            user_names=user_names,
+            user_names=final_user_names, # Возвращаем отфильтрованные имена
             channel_names=channel_names
         )
