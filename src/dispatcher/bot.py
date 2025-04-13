@@ -69,10 +69,14 @@ class Bot[T: BaseModel]:
     async def get_channels(self) -> list[dict[str, str]]:
         """
         Возвращает список каналов, в которых состоит бот, в формате:
-        [{"_id": "channel_id", "name": "channel_name", "t": "channel_type"}, ...]
+        [{"_id": "channel_id", "t": "channel_type"}, "name": "channel_name", ...]
         """
         channel_list = [
-            {"_id": channel["_id"], "name": channel["name"], "t": channel["t"]}
+        {
+            "_id": channel["_id"],
+            "t": channel["t"],
+            "name": "direct" if channel["t"] == "d" else channel["name"]
+        }
             for channel in await self.async_client.get_channels_raw()
         ]
 
