@@ -80,7 +80,7 @@ class Bot[T: BaseModel]:
 
     # TODO: тут тоже надо будет поддержать oldest и latest (думаю надо будет уже str передавать, но мб и datetime)
     def get_group_history(self, group_id: str) -> dict[str, Any]:
-        response = self.sync_client.groups_history(group_id, inclusive=True, count=10000000)
+        response = self.sync_client.groups_history(group_id, inclusive=True, count=0, offset=0)
         if response.status_code != HTTPStatus.OK:
             return {}
 
