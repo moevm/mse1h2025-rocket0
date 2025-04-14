@@ -5,44 +5,41 @@ from models.dto import RequestContext
 from models.domain import UserStats, ChannelStats, StatsData
 from dispatcher import Bot
 from logger_config import general_logger
+from typing import Any
 
 
 class StatsService:
+    def _get_single_user_roles_sync(self, bot: Bot, user_id: str) -> list[str] | None:
+        """Synchronously fetches roles for a single user ID."""
+        try:
+            response = bot.sync_client.users_info(user_id=user_id)
+            
+            if response.status_code != HTTPStatus.OK:
+                general_logger.warning(f"Failed to get info for user {user_id}: Status {response.status_code}")
+                return None
+            
+            user_info: dict[str, Any] = response.json()
+            if user_info.get("success") is False:
+                general_logger.warning(f"API indicated failure for user {user_id}: {user_info.get('error', 'No error message')}")
+                return None
+            
+            return user_info.get("user", {}).get("roles", [])
+        except Exception as e:
+            general_logger.error(f"Exception fetching roles for user {user_id}: {e}", exc_info=True)
+            return None
+
     async def _fetch_user_roles(self, bot: Bot, user_ids: list[str]) -> dict[str, list[str]]:
         """Fetches roles for a list of user IDs concurrently."""
         user_roles_map: dict[str, list[str]] = {}
 
-        async def _fetch_single_user_roles(user_id: str) -> tuple[str, list[str] | None]:
-            """Helper function to fetch roles for a single user using sync client in a thread."""
-            try:
-                # Use asyncio.to_thread to run the synchronous call in a separate thread
-                response = await asyncio.to_thread(bot.sync_client.users_info, user_id=user_id)
-                
-                # Check HTTP status code directly
-                if response.status_code != HTTPStatus.OK:
-                    general_logger.warning(f"Failed to get info for user {user_id}: Status {response.status_code}")
-                    return user_id, None
-                
-                # Check the 'success' field in the JSON response if needed, 
-                # but often status code is enough
-                user_info = response.json()
-                if user_info.get("success") is False: # Explicit check for False
-                     general_logger.warning(f"API indicated failure for user {user_id}: {user_info.get('error', 'No error message')}")
-                     return user_id, None
-                
-                roles = user_info.get("user", {}).get("roles", [])
-                return user_id, roles
-            except Exception as e:
-                # Catch potential exceptions during the request or JSON parsing
-                general_logger.error(f"Error fetching roles for user {user_id}: {e}", exc_info=True)
-                return user_id, None
+        async def _fetch_single_user_roles_async_wrapper(user_id: str) -> tuple[str, list[str] | None]:
+            """Asynchronous wrapper to call the synchronous role fetching logic."""
+            roles = await asyncio.to_thread(self._get_single_user_roles_sync, bot, user_id)
+            return user_id, roles
 
-        # Create tasks for all user IDs
-        tasks = [_fetch_single_user_roles(uid) for uid in user_ids]
-        # Run tasks concurrently and gather results
+        tasks = [_fetch_single_user_roles_async_wrapper(uid) for uid in user_ids]
         results = await asyncio.gather(*tasks)
 
-        # Populate the map with successful results
         for user_id, roles in results:
             if roles is not None:
                 user_roles_map[user_id] = roles
