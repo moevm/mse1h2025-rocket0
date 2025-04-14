@@ -60,7 +60,7 @@ class Bot[T: BaseModel]:
 
     async def resolve_handler(self, ctx: RequestContext) -> None:
         for handler in self._handlers:
-            if handler.check(ctx):
+            if handler.check(ctx, self):
                 await handler.handle(ctx)
 
     async def send_message(self, text: str, channel_id: str, thread_id: str | None = None) -> None:
@@ -89,3 +89,14 @@ class Bot[T: BaseModel]:
             return {}
 
         return response.json()
+    
+    def get_roles(self, user_id: str = None, username: str = None) -> list[str] | None:
+        if not (user_id or username):
+            return None
+        
+        response = self.sync_client.users_info(user_id=user_id, username=username)
+        if response.status_code != HTTPStatus.OK:
+            return None
+        
+        return response.json().get("user", {}).get("roles", [])
+

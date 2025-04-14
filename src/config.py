@@ -11,6 +11,7 @@ class Config:
     mongo_url_for_app: str = field(default=os.getenv("MONGO_URL_FOR_APP", ""))
     command_prefix: str = "!"
     user_server_url: str = field(default=os.getenv("ROCKET_CHAT_URL", ""))
+    priviliged_roles: frozenset[str] = field(default=frozenset(os.getenv("PRIVILIGED_ROLES", "admin").replace(" ", "").split(",")))
 
     def __post_init__(self):
         if self.env_type == "dev":
