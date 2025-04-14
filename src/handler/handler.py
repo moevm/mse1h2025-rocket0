@@ -40,9 +40,9 @@ class Handler[T: BaseModel]:
 
         await wrapper(self.bot, ctx, input)
 
-    def check(self, ctx: RequestContext) -> bool:
+    def check(self, ctx: RequestContext, bot: Bot) -> bool:
         for filter in self.filters:
-            if not filter.check(ctx):
+            if not filter.check(ctx, bot):
                 return False
 
         return True

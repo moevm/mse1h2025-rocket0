@@ -16,6 +16,7 @@ services:
       ROCKET_CHAT_URL: ${ROCKET_CHAT_URL}
       MONGO_URL_FOR_APP: ${MONGO_URL_FOR_APP}
       ENV_TYPE: ${ENV_TYPE}
+      PRIVILIGED_ROLES: ${PRIVILIGED_ROLES}
     volumes:
       - app_logs:/logs
     depends_on:
