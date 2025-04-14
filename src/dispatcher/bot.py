@@ -86,32 +86,3 @@ class Bot[T: BaseModel]:
             return {}
 
         return response.json()
-
-    async def get_user_roles(self, user_ids: list[str]) -> dict[str, list[str]]:
-        user_roles_map: dict[str, list[str]] = {}
-
-        async def _fetch_single_user_roles(user_id: str) -> tuple[str, list[str] | None]:
-            try:
-                response = await asyncio.to_thread(
-                    self.sync_client.users_info, user_id=user_id
-                )
-                response.raise_for_status()
-                user_info = response.json()
-                if user_info.get("success"):
-                    roles = user_info.get("user", {}).get("roles", [])
-                    return user_id, roles
-                else:
-                    general_logger.warning(f"Failed to get info for user {user_id}: {user_info.get('error')}")
-                    return user_id, None
-            except Exception as e:
-                general_logger.error(f"Error fetching roles for user {user_id}: {e}")
-                return user_id, None
-
-        tasks = [_fetch_single_user_roles(uid) for uid in user_ids]
-        results = await asyncio.gather(*tasks)
-
-        for user_id, roles in results:
-            if roles is not None:
-                user_roles_map[user_id] = roles
-        
-        return user_roles_map
