@@ -6,7 +6,7 @@ from typing import Callable, Any, TYPE_CHECKING
 from functools import partial
 from http import HTTPStatus
 from pydantic import BaseModel
-from models.enums import EventType
+from models.enums import EventType, RoomType
 from handler import Handler, CallbackType
 import asyncio
 import uuid
@@ -69,14 +69,18 @@ class Bot[T: BaseModel]:
     async def get_channels(self) -> list[dict[str, str]]:
         """
         Возвращает список каналов, в которых состоит бот, в формате:
-        [{"_id": "channel_id", "name": "channel_name", "t": "channel_type"}, ...]
+        [{"_id": "channel_id", "t": "channel_type", "name": "channel_name"}, ...]
         """
-        channel_list = [
-            {"_id": channel["_id"], "name": channel["name"], "t": channel["t"]}
+        channels: list[dict[str, str]] = [
+            {
+                "_id": channel["_id"],
+                "t": channel["t"],
+                "name": "direct" if channel["t"] == RoomType.DIRECT else channel["name"]
+            }
             for channel in await self.async_client.get_channels_raw()
         ]
 
-        return channel_list
+        return channels
 
     # TODO: тут тоже надо будет поддержать oldest и latest (думаю надо будет уже str передавать, но мб и datetime)
     def get_group_history(self, group_id: str) -> dict[str, Any]:
