@@ -1,1 +1,1 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"dataType":{"$numberInt":"1"}},"name":"dataType_1"}],"uuid":"eb27f8ca123d412b96a62e74c3ed4175","collectionName":"rocketchat_import_data","type":"collection"}
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"dataType":{"$numberInt":"1"}},"name":"dataType_1"}],"uuid":"f988e243d35b438288f40fa281f75e53","collectionName":"rocketchat_import_data","type":"collection"}

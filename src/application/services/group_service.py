@@ -2,10 +2,8 @@ from datetime import datetime
 from typing import Any
 from models.domain import ChatMessage, ChatMessageSender
 from models.dto import RequestContext
+from models.enums import RoomType
 from dispatcher import Bot
-
-
-GROUP_TYPE = "p"
 
 
 class GroupService:
@@ -19,7 +17,7 @@ class GroupService:
         from_date: datetime = None,
         to_date: datetime = None,
     ) -> list[ChatMessage]:
-        groups = list(filter(lambda chan: chan["t"] == GROUP_TYPE, await bot.get_channels()))
+        groups = list(filter(lambda chan: chan["t"] == RoomType.GROUP, await bot.get_channels()))
         result: list[ChatMessage] = []
 
         for group in groups:
