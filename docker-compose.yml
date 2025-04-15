@@ -1,6 +1,8 @@
 volumes:
   mongodb_data:
     driver: local
+  app_logs:
+    driver: local
 
 
 services:
@@ -16,7 +18,7 @@ services:
       ENV_TYPE: ${ENV_TYPE}
       PRIVILIGED_ROLES: ${PRIVILIGED_ROLES}
     volumes:
-      - ./logs:/logs
+      - app_logs:/logs
     depends_on:
       - mongodb
   
@@ -24,5 +26,3 @@ services:
     image: mongo:8.0
     volumes:
       - mongodb_data:/data/db
-    ports:
-      - "27017:27017" 

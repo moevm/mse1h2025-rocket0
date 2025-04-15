@@ -23,7 +23,7 @@ def setup_logger(name: str, level: int = logging.INFO, to_console: bool = False,
         logger.addHandler(console_handler)
 
     if to_file and len(to_file) > 0:
-        file_handler = RotatingFileHandler(os.path.join(LOG_DIR, to_file), maxBytes=1000000, backupCount=5, encoding="utf-8")
+        file_handler = RotatingFileHandler(os.path.join(LOG_DIR, to_file), maxBytes=10000000, backupCount=5, encoding="utf-8")
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
@@ -32,5 +32,5 @@ def setup_logger(name: str, level: int = logging.INFO, to_console: bool = False,
 
 
 general_logger = setup_logger("general", logging.INFO, to_console=True)
-requests_logger = setup_logger("requests", logging.INFO, to_file="requests.log")
+requests_logger = setup_logger("requests", logging.INFO, to_file="requests.log", to_console=True)
 debug_logger = setup_logger("debug", logging.DEBUG, to_console=True)
