@@ -16,39 +16,23 @@ class GroupService:
         self,
         bot: Bot,
         ctx: RequestContext,
+        from_date: datetime = None,
+        to_date: datetime = None,
     ) -> list[ChatMessage]:
         groups = list(filter(lambda chan: chan["t"] == GROUP_TYPE, await bot.get_channels()))
         result: list[ChatMessage] = []
-        #TODO: разобраться с таймзонами (даты верные, часы опаздывают от тех, что в чате)
-        if ctx.args.get('from') is None:
-            min_ts = None
-            for group in groups:
-                history_data: dict[str, Any] = bot.get_group_history(group["_id"])
-                messages = history_data.get("messages", [])
-                for message in messages:
-                    msg_ts = datetime.fromisoformat(message.get("ts"))
-                    if min_ts is None or msg_ts < min_ts:
-                            min_ts = msg_ts
-            effective_from_date = min_ts or datetime.now(timezone.utc)
-        else:
-            effective_from_date = ctx.args.get('from').astimezone(timezone.utc)
-        effective_to_date = ctx.args.get('to').astimezone(timezone.utc) if ctx.args.get('to') is not None else datetime.now(timezone.utc)
         
-
+        oldest_str = from_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if from_date else None
+        latest_str = to_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if to_date else None
+        
         for group in groups:
-            # TODO: oldest и latest аргументы заюзать
-            history_data: dict[str, Any] = bot.get_group_history(group["_id"])
+            history_data: dict[str, Any] = bot.get_group_history(group["_id"], oldest=oldest_str, latest=latest_str)
             messages: list[dict[str, Any]] = history_data.get("messages", [])
 
             unanswered: dict[str, ChatMessage] = {}
             answered: set[str] = set()
 
             for message in messages:
-                
-                msg_ts = datetime.fromisoformat(message.get("ts"))
-                if msg_ts and not (effective_from_date <= msg_ts <= effective_to_date):
-                    continue
-                
                 message_id = message["_id"]
                 if "t" in message:
                     continue

@@ -78,9 +78,16 @@ class Bot[T: BaseModel]:
 
         return channel_list
 
-    # TODO: тут тоже надо будет поддержать oldest и latest (думаю надо будет уже str передавать, но мб и datetime)
-    def get_group_history(self, group_id: str) -> dict[str, Any]:
-        response = self.sync_client.groups_history(group_id, inclusive=True, count=10000000)
+    def get_group_history(self, group_id: str, oldest: str = None, latest: str = None) -> dict[str, Any]:
+        params = {
+            "inclusive": True,
+            "count": 1000000
+        }
+        if oldest:
+            params["oldest"] = oldest
+        if latest:
+            params["latest"] = latest
+        response = self.sync_client.groups_history(group_id, **params)
         if response.status_code != HTTPStatus.OK:
             return {}
 
