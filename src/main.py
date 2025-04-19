@@ -1,7 +1,7 @@
 from datetime import datetime
 from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser, CommandInfo, ArgSchema
-from handler.filters import CommandFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
+from handler.filters import CommandFilter, RoleFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
 from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler
 from application.services import GroupService, StatsService
 from models.enums import Command
@@ -13,16 +13,22 @@ import asyncio
 
 def register_handlers(bot: Bot, cfg: Config) -> None:
     time_handler = TimeCommandHandler()
-    bot.register_handler(time_handler.handle, NoArgs, filters=[CommandFilter(Command.TIME)])
+    bot.register_handler(time_handler.handle,
+                         NoArgs,
+                         filters=[CommandFilter(Command.TIME), RoleFilter(cfg.priviliged_roles)])
 
     stats_service = StatsService()
     stats_handler = StatsHandler(stats_service)
-    bot.register_handler(stats_handler.handle, StatsArgs, filters=[CommandFilter(Command.STATS)])
+    bot.register_handler(stats_handler.handle,
+                         StatsArgs, 
+                         filters=[CommandFilter(Command.STATS), RoleFilter(cfg.priviliged_roles)])
 
     group_service = GroupService(cfg.command_prefix)
     find_unanswered_handler = FindUnansweredHandler(cfg.user_server_url, group_service)
 
-    bot.register_handler(find_unanswered_handler.handle, FindUnansweredArgs, filters=[CommandFilter(Command.FIND_UNANSWERED)]) # noqa
+    bot.register_handler(find_unanswered_handler.handle,
+                         FindUnansweredArgs,
+                         filters=[CommandFilter(Command.FIND_UNANSWERED), RoleFilter(cfg.priviliged_roles)])
     
     # Должен регистрироваться после всех команд
     question_handler = QuestionHandler()

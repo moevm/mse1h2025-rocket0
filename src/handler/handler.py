@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Awaitable
 from dataclasses import dataclass, field
 from typing import Callable, TYPE_CHECKING
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 import inspect
 
 
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 
 type CallbackType[T:BaseModel] = Callable[[Bot, RequestContext, T], Awaitable[None]]
+
 
 @dataclass
 class Handler[T: BaseModel]:
@@ -29,10 +30,7 @@ class Handler[T: BaseModel]:
 
     async def handle(self, ctx: RequestContext) -> None:
         args = ctx.args if ctx.args is not None else {}
-        try:
-            input = self.input_type(**args)
-        except ValidationError:
-            return
+        input = self.input_type(**args)
 
         if self.awaitable:
             return await self.callback(self.bot, ctx, input)
@@ -42,9 +40,9 @@ class Handler[T: BaseModel]:
 
         await wrapper(self.bot, ctx, input)
 
-    def check(self, ctx: RequestContext) -> bool:
+    def check(self, ctx: RequestContext, bot: Bot) -> bool:
         for filter in self.filters:
-            if not filter.check(ctx):
+            if not filter.check(ctx, bot):
                 return False
 
         return True
