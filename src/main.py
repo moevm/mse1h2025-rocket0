@@ -67,7 +67,8 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
 if __name__ == '__main__':
     config = Config()
 
-    add_telegram_handler(requests_logger, config.telegram_token, list(config.telegram_users_allow_list))
+    if len(config.telegram_token) > 0:
+        add_telegram_handler(requests_logger, config.telegram_token, list(config.telegram_users_allow_list))
 
     b = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password)
     register_handlers(b, config)
