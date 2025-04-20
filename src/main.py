@@ -7,7 +7,7 @@ from application.services import GroupService, StatsService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs, StatsArgs
 from config import Config
-from logger_config import general_logger
+from logger_config import general_logger, requests_logger, add_telegram_handler
 import asyncio
 
 
@@ -15,20 +15,20 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
     time_handler = TimeCommandHandler()
     bot.register_handler(time_handler.handle,
                          NoArgs,
-                         filters=[CommandFilter(Command.TIME), RoleFilter(cfg.priviliged_roles)])
+                         filters=[CommandFilter(Command.TIME), RoleFilter(cfg.privileged_roles)])
 
     stats_service = StatsService()
     stats_handler = StatsHandler(stats_service)
     bot.register_handler(stats_handler.handle,
                          StatsArgs, 
-                         filters=[CommandFilter(Command.STATS), RoleFilter(cfg.priviliged_roles)])
+                         filters=[CommandFilter(Command.STATS), RoleFilter(cfg.privileged_roles)])
 
     group_service = GroupService(cfg.command_prefix)
     find_unanswered_handler = FindUnansweredHandler(cfg.user_server_url, group_service)
 
     bot.register_handler(find_unanswered_handler.handle,
                          FindUnansweredArgs,
-                         filters=[CommandFilter(Command.FIND_UNANSWERED), RoleFilter(cfg.priviliged_roles)])
+                         filters=[CommandFilter(Command.FIND_UNANSWERED), RoleFilter(cfg.privileged_roles)])
     
     # Должен регистрироваться после всех команд
     question_handler = QuestionHandler()
@@ -66,6 +66,9 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
 
 if __name__ == '__main__':
     config = Config()
+
+    add_telegram_handler(requests_logger, config.telegram_token, list(config.telegram_users_allow_list))
+
     b = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password)
     register_handlers(b, config)
 
