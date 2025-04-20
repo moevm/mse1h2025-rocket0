@@ -10,13 +10,8 @@ services:
     build: .
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    environment:
-      ROCKET_CHAT_USER: ${ROCKET_CHAT_USER}
-      ROCKET_CHAT_PASSWORD: ${ROCKET_CHAT_PASSWORD}
-      ROCKET_CHAT_URL: ${ROCKET_CHAT_URL}
-      MONGO_URL_FOR_APP: ${MONGO_URL_FOR_APP}
-      ENV_TYPE: ${ENV_TYPE}
-      PRIVILEGED_ROLES: ${PRIVILEGED_ROLES}
+    env_file:
+      - .env
     volumes:
       - app_logs:/logs
     depends_on:
