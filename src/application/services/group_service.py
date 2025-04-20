@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 from models.domain import ChatMessage, ChatMessageSender
 from models.dto import RequestContext
@@ -20,11 +20,8 @@ class GroupService:
         groups = list(filter(lambda chan: chan["t"] == RoomType.GROUP, await bot.get_channels()))
         result: list[ChatMessage] = []
         
-        oldest_str = from_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if from_date else None
-        latest_str = to_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if to_date else None
-        
         for group in groups:
-            history_data: dict[str, Any] = bot.get_group_history(group["_id"], oldest=oldest_str, latest=latest_str)
+            history_data: dict[str, Any] = bot.get_group_history(group["_id"], oldest=from_date, latest=to_date)
             messages: list[dict[str, Any]] = history_data.get("messages", [])
 
             unanswered: dict[str, ChatMessage] = {}
