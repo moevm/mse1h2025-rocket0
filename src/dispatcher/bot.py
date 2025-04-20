@@ -85,7 +85,8 @@ class Bot[T: BaseModel]:
     def get_group_history(self, group_id: str, oldest: str = None, latest: str = None) -> dict[str, Any]:
         params = {
             "inclusive": True,
-            "count": 1000000
+            "count": 0,
+            "offset": 0
         }
         if oldest:
             params["oldest"] = oldest
