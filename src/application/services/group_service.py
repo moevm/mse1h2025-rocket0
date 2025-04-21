@@ -19,10 +19,9 @@ class GroupService:
     ) -> list[ChatMessage]:
         groups = list(filter(lambda chan: chan["t"] == RoomType.GROUP, await bot.get_channels()))
         result: list[ChatMessage] = []
-
+        
         for group in groups:
-            # TODO: oldest и latest аргументы заюзать
-            history_data: dict[str, Any] = bot.get_group_history(group["_id"])
+            history_data: dict[str, Any] = bot.get_group_history(group["_id"], oldest=from_date, latest=to_date)
             messages: list[dict[str, Any]] = history_data.get("messages", [])
 
             unanswered: dict[str, ChatMessage] = {}
