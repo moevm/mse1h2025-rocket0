@@ -77,7 +77,7 @@ class StatsService:
             if channel_id not in channels:
                 channels[channel_id] = ChannelStats()
 
-            history = bot.get_group_history(channel_id)
+            history = bot.get_group_history(channel_id, oldest=from_date, latest=to_date)
             for msg in history.get("messages", []):
                 if "t" in msg:
                     continue
@@ -142,7 +142,7 @@ class StatsService:
                 channel_id = channel["_id"]
                 final_channels[channel_id] = ChannelStats() 
                 
-                history = bot.get_group_history(channel_id) 
+                history = bot.get_group_history(channel_id, oldest=from_date, latest=to_date) 
                 for msg in history.get("messages", []):
                     if "t" in msg:
                         continue
