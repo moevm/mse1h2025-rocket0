@@ -2,10 +2,8 @@ from datetime import datetime
 from typing import Any
 from models.domain import ChatMessage, ChatMessageSender
 from models.dto import RequestContext
+from models.enums import RoomType
 from dispatcher import Bot
-
-
-GROUP_TYPE = "p"
 
 
 class GroupService:
@@ -19,12 +17,11 @@ class GroupService:
         from_date: datetime = None,
         to_date: datetime = None,
     ) -> list[ChatMessage]:
-        groups = list(filter(lambda chan: chan["t"] == GROUP_TYPE, await bot.get_channels()))
+        groups = list(filter(lambda chan: chan["t"] == RoomType.GROUP, await bot.get_channels()))
         result: list[ChatMessage] = []
-
+        
         for group in groups:
-            # TODO: oldest и latest аргументы заюзать
-            history_data: dict[str, Any] = bot.get_group_history(group["_id"])
+            history_data: dict[str, Any] = bot.get_group_history(group["_id"], oldest=from_date, latest=to_date)
             messages: list[dict[str, Any]] = history_data.get("messages", [])
 
             unanswered: dict[str, ChatMessage] = {}

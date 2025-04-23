@@ -6,8 +6,9 @@ from typing import Callable, Any, TYPE_CHECKING
 from functools import partial
 from http import HTTPStatus
 from pydantic import BaseModel
-from models.enums import EventType
+from models.enums import EventType, RoomType
 from handler import Handler, CallbackType
+from datetime import datetime, timezone
 import asyncio
 import uuid
 from logger_config import general_logger
@@ -61,7 +62,7 @@ class Bot[T: BaseModel]:
 
     async def resolve_handler(self, ctx: RequestContext) -> None:
         for handler in self._handlers:
-            if handler.check(ctx):
+            if handler.check(ctx, self):
                 await handler.handle(ctx)
 
     async def send_message(self, text: str, channel_id: str, thread_id: str | None = None) -> None:
@@ -70,19 +71,42 @@ class Bot[T: BaseModel]:
     async def get_channels(self) -> list[dict[str, str]]:
         """
         Возвращает список каналов, в которых состоит бот, в формате:
-        [{"_id": "channel_id", "name": "channel_name", "t": "channel_type"}, ...]
+        [{"_id": "channel_id", "t": "channel_type", "name": "channel_name"}, ...]
         """
-        channel_list = [
-            {"_id": channel["_id"], "name": channel["name"], "t": channel["t"]}
+        channels: list[dict[str, str]] = [
+            {
+                "_id": channel["_id"],
+                "t": channel["t"],
+                "name": "direct" if channel["t"] == RoomType.DIRECT else channel["name"]
+            }
             for channel in await self.async_client.get_channels_raw()
         ]
 
-        return channel_list
+        return channels
 
-    # TODO: тут тоже надо будет поддержать oldest и latest (думаю надо будет уже str передавать, но мб и datetime)
-    def get_group_history(self, group_id: str) -> dict[str, Any]:
-        response = self.sync_client.groups_history(group_id, inclusive=True, count=10000000)
+    def get_group_history(self, group_id: str, oldest: datetime = None, latest: datetime = None) -> dict[str, Any]:
+        params = {
+            "inclusive": True,
+            "count": 0,
+            "offset": 0
+        }
+        if oldest:
+            params["oldest"] = oldest.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        if latest:
+            params["latest"] = latest.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        response = self.sync_client.groups_history(group_id, **params)
         if response.status_code != HTTPStatus.OK:
             return {}
 
         return response.json()
+    
+    def get_roles(self, user_id: str = None, username: str = None) -> list[str] | None:
+        if not (user_id or username):
+            return None
+        
+        response = self.sync_client.users_info(user_id=user_id, username=username)
+        if response.status_code != HTTPStatus.OK:
+            return None
+        
+        return response.json().get("user", {}).get("roles", [])
+
