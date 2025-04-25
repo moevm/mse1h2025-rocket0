@@ -7,9 +7,10 @@ from dispatcher import Bot
 
 
 class GroupService:
-    def __init__(self, command_prefix, service_reactions):
+    def __init__(self, command_prefix, service_reactions, priviliged_roles):
         self._command_prefix = command_prefix
         self._service_reactions = service_reactions
+        self._priviliged_roles = priviliged_roles
 
     async def get_unanswered_messages(
         self,
@@ -45,8 +46,15 @@ class GroupService:
                 if sender_id == bot.id:
                     continue
 
-                if "reactions" in message and self._service_reactions & set(message["reactions"].keys()):
-                    continue
+                if "reactions" in message:
+                    reactions = self._service_reactions & set(message["reactions"].keys())
+                                
+                    if any(
+                        bool(self._priviliged_roles & set(bot.get_roles(username=username)))
+                        for reaction in reactions
+                        for username in message["reactions"][reaction]["usernames"]
+                        ):
+                        continue
 
                 if "tmid" in message:
                     answered.add(message["tmid"])
