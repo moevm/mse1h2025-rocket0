@@ -11,6 +11,7 @@ from handler import Handler, CallbackType
 from datetime import datetime, timezone
 import asyncio
 import uuid
+from logger_config import general_logger
 
 
 if TYPE_CHECKING:

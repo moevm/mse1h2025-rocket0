@@ -45,7 +45,6 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
         'channels': ArgSchema(str, nargs='*'),
     }
     stats_schema = {
-        'hours': ArgSchema(int),
         'from': ArgSchema(datetime),
         'to': ArgSchema(datetime),
         'channels': ArgSchema(str, nargs='*'),
