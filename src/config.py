@@ -10,6 +10,7 @@ class Config:
     rocket_chat_url: str = field(default=os.getenv("ROCKET_CHAT_URL"))
     mongo_url_for_app: str = field(default=os.getenv("MONGO_URL_FOR_APP"))
     command_prefix: str = "!"
+    service_reactions: frozenset[str] = frozenset((":gear:",))
     user_server_url: str = field(default=os.getenv("ROCKET_CHAT_URL"))
     priviliged_roles: frozenset[str] = field(default=frozenset(os.getenv("PRIVILIGED_ROLES").replace(" ", "").split(",")))
 
