@@ -5,6 +5,10 @@ from models.dto import RequestContext, StatsArgs
 from models.domain import StatsData, UserStats
 from application.handlers.interface import ApplicationHandler
 from application.services import StatsService
+import csv
+import io
+import tempfile
+import os
 
 if TYPE_CHECKING:
     from dispatcher.bot import Bot
@@ -24,60 +28,83 @@ class StatsHandler(ApplicationHandler):
             input.users,
             input.roles
         )
-        response = self._format_response(stats)
-        await bot.send_message(response, ctx.channel_id, ctx.thread_id)
+        csv_content = self._create_csv_content(stats)
 
-    def _format_response(self, stats: StatsData) -> str:
-        lines = ["Статистика пользователей:"]
+        with tempfile.NamedTemporaryFile(mode='w+', suffix=".csv", delete=False, encoding='utf-8') as temp_file:
+            temp_file.write(csv_content)
+            temp_file_path = temp_file.name
 
+        try:
+            await bot.send_file(
+                channel_id=ctx.channel_id,
+                file=temp_file_path,
+            )
+
+            await bot.send_message(
+                text=f"Statistics for period from {input.from_date} to {input.to_date}",
+                channel_id=ctx.channel_id,
+                thread_id=ctx.thread_id
+            )
+        finally:
+            os.remove(temp_file_path)
+
+    def _create_csv_content(self, stats: StatsData) -> str:
+        output = io.StringIO()
+        writer = csv.writer(output)
+
+        writer.writerow(["User statistics"])
+        writer.writerow([
+            "Username", "Messages", "Questions", "Answers",
+            "Reactions given", "Reactions received", "Roles"
+        ])
         for user_id, data in stats.users.items():
             name = stats.user_names.get(user_id, "Unknown")
-            lines.append(
-                f"- {name}:\n"
-                f"  Сообщений: {data.messages}\n"
-                f"  Вопросов: {data.questions}\n"
-                f"  Ответов: {data.answers}\n"
-                f"  Реакций: {data.reactions_given} → / {data.reactions_received} ←"
-            )
+            roles = ", ".join(stats.user_roles.get(user_id, []))
+            writer.writerow([
+                name, data.messages, data.questions, data.answers,
+                data.reactions_given, data.reactions_received, roles
+            ])
 
-        lines.append("\nСтатистика по каналам:")
+        writer.writerow([])
+
+        writer.writerow(["Channel statistics"])
+        writer.writerow([
+            "Channel name", "Messages", "Questions", "Answers", "Reactions"
+        ])
         for channel_id, data in stats.channels.items():
             name = stats.channel_names.get(channel_id, "Unknown")
-            lines.append(
-                f"- {name}:\n"
-                f"  Сообщений: {data.messages}\n"
-                f"  Вопросов: {data.questions}\n"
-                f"  Ответов: {data.answers}\n"
-                f"  Реакций: {data.reactions}"
-            )
+            writer.writerow([
+                name, data.messages, data.questions, data.answers, data.reactions
+            ])
 
-        # Агрегация статистики по ролям
+        writer.writerow([])
+
         role_stats: dict[str, UserStats] = {}
         for user_id, user_stat in stats.users.items():
             roles = stats.user_roles.get(user_id, [])
             for role in roles:
                 if role not in role_stats:
                     role_stats[role] = UserStats()
-                # Суммируем статистику для каждой роли
                 role_stats[role] = UserStats(
                     messages=role_stats[role].messages + user_stat.messages,
                     questions=role_stats[role].questions + user_stat.questions,
                     answers=role_stats[role].answers + user_stat.answers,
-                    reactions_given=role_stats[role].reactions_given + user_stat.reactions_given,
-                    reactions_received=role_stats[role].reactions_received + user_stat.reactions_received
-                )
-        
-        # Добавляем блок статистики по ролям
-        if role_stats:
-            lines.append("\nСтатистика по ролям:")
-            for role, data in role_stats.items():
-                lines.append(
-                    f"- {role}:\n"
-                    f"  Сообщений: {data.messages}\n"
-                    f"  Вопросов: {data.questions}\n"
-                    f"  Ответов: {data.answers}\n"
-                    f"  Реакций выдано: {data.reactions_given}\n"
-                    f"  Реакций получено: {data.reactions_received}"
+                    reactions_given=role_stats[role].reactions_given +
+                    user_stat.reactions_given,
+                    reactions_received=role_stats[role].reactions_received +
+                    user_stat.reactions_received
                 )
 
-        return "\n".join(lines)
+        if role_stats:
+            writer.writerow(["Role statistics"])
+            writer.writerow([
+                "Role", "Messages", "Questions", "Answers",
+                "Reactions given", "Reactions received"
+            ])
+            for role, data in role_stats.items():
+                writer.writerow([
+                    role, data.messages, data.questions, data.answers,
+                    data.reactions_given, data.reactions_received
+                ])
+
+        return output.getvalue()

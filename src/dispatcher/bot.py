@@ -26,7 +26,8 @@ class Bot[T: BaseModel]:
         self._password: str = password
 
         self.async_client: RocketChatAsync = RocketChatAsync()
-        self.sync_client: RocketChat = RocketChat(username, password, server_url=f'http://{server_url}')
+        self.sync_client: RocketChat = RocketChat(
+            username, password, server_url=f'http://{server_url}')
 
         self._local_id: uuid.UUID = uuid.uuid4()
         self._id: str = self.sync_client.me().json()["_id"]
@@ -49,7 +50,8 @@ class Bot[T: BaseModel]:
 
                 for channel_id, _ in await self.async_client.get_channels():
                     await self.async_client.subscribe_to_channel_messages(
-                        channel_id, partial(callback, self.local_id, EventType.MESSAGE)
+                        channel_id, partial(
+                            callback, self.local_id, EventType.MESSAGE)
                     )
 
                 await self.async_client.run_forever()
@@ -67,6 +69,9 @@ class Bot[T: BaseModel]:
 
     async def send_message(self, text: str, channel_id: str, thread_id: str | None = None) -> None:
         await self.async_client.send_message(text, channel_id, thread_id)
+
+    async def send_file(self, file: str, channel_id: str | None = None) -> None:
+        await self.sync_client.rooms_upload(rid=channel_id, file=file)
 
     async def get_channels(self) -> list[dict[str, str]]:
         """
@@ -91,22 +96,24 @@ class Bot[T: BaseModel]:
             "offset": 0
         }
         if oldest:
-            params["oldest"] = oldest.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            params["oldest"] = oldest.astimezone(
+                timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         if latest:
-            params["latest"] = latest.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            params["latest"] = latest.astimezone(
+                timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         response = self.sync_client.groups_history(group_id, **params)
         if response.status_code != HTTPStatus.OK:
             return {}
 
         return response.json()
-    
+
     def get_roles(self, user_id: str = None, username: str = None) -> list[str] | None:
         if not (user_id or username):
             return None
-        
-        response = self.sync_client.users_info(user_id=user_id, username=username)
+
+        response = self.sync_client.users_info(
+            user_id=user_id, username=username)
         if response.status_code != HTTPStatus.OK:
             return None
-        
-        return response.json().get("user", {}).get("roles", [])
 
+        return response.json().get("user", {}).get("roles", [])
