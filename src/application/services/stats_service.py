@@ -3,6 +3,7 @@ from http import HTTPStatus
 from datetime import datetime
 from models.dto import RequestContext
 from models.domain import UserStats, ChannelStats, StatsData
+from application.services.common import get_channel_history
 from dispatcher import Bot
 from logger_config import general_logger
 from typing import Any
@@ -13,16 +14,16 @@ class StatsService:
         """Synchronously fetches roles for a single user ID."""
         try:
             response = bot.sync_client.users_info(user_id=user_id)
-            
+
             if response.status_code != HTTPStatus.OK:
                 general_logger.warning(f"Failed to get info for user {user_id}: Status {response.status_code}")
                 return None
-            
+
             user_info: dict[str, Any] = response.json()
             if user_info.get("success") is False:
                 general_logger.warning(f"API indicated failure for user {user_id}: {user_info.get('error', 'No error message')}")
                 return None
-            
+
             return user_info.get("user", {}).get("roles", [])
         except Exception as e:
             general_logger.error(f"Exception fetching roles for user {user_id}: {e}", exc_info=True)
@@ -77,7 +78,7 @@ class StatsService:
             if channel_id not in channels:
                 channels[channel_id] = ChannelStats()
 
-            history = bot.get_group_history(channel_id, oldest=from_date, latest=to_date)
+            history: dict[str, Any] = get_channel_history(bot, channel, from_date, to_date)
             for msg in history.get("messages", []):
                 if "t" in msg:
                     continue
@@ -112,7 +113,7 @@ class StatsService:
 
         final_users = users
         final_user_names = user_names
-        
+
         collected_user_ids = list(final_user_names.keys())
         user_roles: dict[str, list[str]] = {}
         if collected_user_ids:
@@ -123,7 +124,7 @@ class StatsService:
         if all_users:
             user_ids_by_name = {uid for uid, name in user_names.items() if name in all_users}
             target_user_ids = user_ids_by_name
-        
+
         if all_roles:
             role_list_lower = {r.lower() for r in all_roles}
             user_ids_by_role = {uid for uid, roles in user_roles.items() if any(role.lower() in role_list_lower for role in roles)}
@@ -135,18 +136,18 @@ class StatsService:
         if target_user_ids is not None:
             final_users = {uid: stats for uid, stats in users.items() if uid in target_user_ids}
             final_user_names = {uid: name for uid, name in user_names.items() if uid in target_user_ids}
-            
+
             # Пересчитываем статистику каналов ТОЛЬКО для отфильтрованных пользователей
             final_channels: dict[str, ChannelStats] = {}
             for channel in target_channels:
                 channel_id = channel["_id"]
-                final_channels[channel_id] = ChannelStats() 
-                
-                history = bot.get_group_history(channel_id, oldest=from_date, latest=to_date) 
+                final_channels[channel_id] = ChannelStats()
+
+                history = bot.get_group_history(channel_id, oldest=from_date, latest=to_date)
                 for msg in history.get("messages", []):
                     if "t" in msg:
                         continue
-                    
+
                     msg_user_id = msg["u"]["_id"]
                     if msg_user_id in target_user_ids: 
                         final_channels[channel_id] = ChannelStats(

@@ -1,3 +1,3 @@
 # flake8: noqa
-from application.services.group_service import GroupService
+from application.services.channel_service import ChannelService
 from application.services.stats_service import StatsService
