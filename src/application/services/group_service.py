@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any
+import re
 from models.domain import ChatMessage, ChatMessageSender
 from models.dto import RequestContext
 from models.enums import RoomType
@@ -70,5 +71,43 @@ class GroupService:
                     )
 
             result.extend(list(unanswered.values()))
+
+        return result
+    
+    async def get_messages_by_pattern(
+        self,
+        bot: Bot,
+        pattern: str,
+        max_results: int = 50
+    ) -> list[ChatMessage]:
+        regex = re.compile(pattern)
+        groups = list(filter(lambda chan: chan["t"] == RoomType.GROUP, await bot.get_channels()))
+        result: list[ChatMessage] = []
+        
+        for group in groups:
+            history_data = bot.get_group_history(group["_id"])
+            messages = history_data.get("messages", [])
+
+            for message in messages:
+                if "t" in message:
+                    continue
+
+                if message["msg"].startswith(self._command_prefix):
+                    continue
+
+                sender_id = message["u"]["_id"]
+
+                if sender_id == bot.id:
+                    continue
+                
+                if "msg" in message and regex.search(message["msg"]):
+                    result.append(ChatMessage(
+                        id=message["_id"],
+                        rid=message["rid"],
+                        msg=message["msg"],
+                        u=ChatMessageSender(id=message["u"]["_id"], username=message["u"]["username"])
+                    ))
+                    if len(result) >= max_results:
+                        return result
 
         return result

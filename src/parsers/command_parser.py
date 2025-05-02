@@ -13,6 +13,7 @@ class ArgSchema[T]:
     required: bool = False
     default: T | None = None
     nargs: str | None = None
+    positional: bool = False
 
 
 @dataclass
@@ -66,8 +67,12 @@ class ChatCommandParser(CommandParser):
         parser = argparse.ArgumentParser(prog="command", add_help=False)
 
         for arg_name, arg_sсhema in sсhema.items():
-            flag = f"--{arg_name}"
-            kwargs = {'required': False, 'dest': arg_name}
+            kwargs = {}
+            if arg_sсhema.positional:
+                flag = arg_name
+            else:
+                flag = f"--{arg_name}"
+                kwargs['dest'] = arg_name
 
             if arg_sсhema.type == bool:
                 kwargs['action'] = 'store_true'
