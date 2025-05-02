@@ -77,8 +77,7 @@ class GroupService:
     async def get_messages_by_pattern(
         self,
         bot: Bot,
-        pattern: str,
-        max_results: int = 50
+        pattern: str
     ) -> list[ChatMessage]:
         regex = re.compile(pattern)
         groups = list(filter(lambda chan: chan["t"] == RoomType.GROUP, await bot.get_channels()))
@@ -107,7 +106,5 @@ class GroupService:
                         msg=message["msg"],
                         u=ChatMessageSender(id=message["u"]["_id"], username=message["u"]["username"])
                     ))
-                    if len(result) >= max_results:
-                        return result
 
         return result
