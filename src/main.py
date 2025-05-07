@@ -23,7 +23,7 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
                          StatsArgs, 
                          filters=[CommandFilter(Command.STATS), RoleFilter(cfg.privileged_roles)])
 
-    channel_service = ChannelService(cfg.command_prefix, cfg.service_reactions, cfg.priviliged_roles)
+    channel_service = ChannelService(cfg.command_prefix, cfg.service_reactions, cfg.privileged_roles)
     find_unanswered_handler = FindUnansweredHandler(cfg.user_server_url, channel_service)
 
     bot.register_handler(find_unanswered_handler.handle,
