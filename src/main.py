@@ -3,7 +3,7 @@ from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser, CommandInfo, ArgSchema
 from handler.filters import CommandFilter, RoleFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
 from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler, FindMessageHandler
-from application.services import ChannelService, GroupService, StatsService
+from application.services import ChannelService, StatsService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs, StatsArgs, FindMessageArgs
 from config import Config

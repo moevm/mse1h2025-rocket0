@@ -76,13 +76,13 @@ class ChannelService:
         pattern: str
     ) -> list[ChatMessage]:
         regex = re.compile(pattern)
-        groups = list(filter(lambda chan: chan["t"] == RoomType.GROUP, await bot.get_channels()))
+        channels: list[dict[str, str]] = await bot.get_channels()
         result: list[ChatMessage] = []
         
-        for group in groups:
-            history_data = bot.get_group_history(group["_id"])
-            messages = history_data.get("messages", [])
-
+        for channel in channels:
+            history_data: dict[str, Any] = get_channel_history(bot, channel)
+            messages: list[dict[str, Any]] = history_data.get("messages", [])
+            
             for message in messages:
                 if "t" in message:
                     continue
@@ -94,7 +94,7 @@ class ChannelService:
 
                 if sender_id == bot.id:
                     continue
-                
+      
                 if "msg" in message and regex.search(message["msg"]):
                     result.append(ChatMessage(
                         id=message["_id"],

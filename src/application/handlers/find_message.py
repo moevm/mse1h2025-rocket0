@@ -3,14 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from models.dto import RequestContext, FindMessageArgs
 from application.handlers.interface import ApplicationHandler
-from application.services import GroupService
+from application.services import ChannelService
 
 
 if TYPE_CHECKING:
     from dispatcher.bot import Bot
     
 class FindMessageHandler(ApplicationHandler):
-    def __init__(self, server_url: str, group_service: GroupService) -> None:
+    def __init__(self, server_url: str, group_service: ChannelService) -> None:
         self._server_url = server_url
         self._group_service = group_service
         
