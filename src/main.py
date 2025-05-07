@@ -3,7 +3,7 @@ from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser, CommandInfo, ArgSchema
 from handler.filters import CommandFilter, RoleFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
 from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler
-from application.services import GroupService, StatsService
+from application.services import ChannelService, StatsService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs, StatsArgs
 from config import Config
@@ -23,8 +23,8 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
                          StatsArgs, 
                          filters=[CommandFilter(Command.STATS), RoleFilter(cfg.privileged_roles)])
 
-    group_service = GroupService(cfg.command_prefix)
-    find_unanswered_handler = FindUnansweredHandler(cfg.user_server_url, group_service)
+    channel_service = ChannelService(cfg.command_prefix, cfg.service_reactions, cfg.priviliged_roles)
+    find_unanswered_handler = FindUnansweredHandler(cfg.user_server_url, channel_service)
 
     bot.register_handler(find_unanswered_handler.handle,
                          FindUnansweredArgs,
@@ -45,7 +45,6 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
         'channels': ArgSchema(str, nargs='*'),
     }
     stats_schema = {
-        'hours': ArgSchema(int),
         'from': ArgSchema(datetime),
         'to': ArgSchema(datetime),
         'channels': ArgSchema(str, nargs='*'),

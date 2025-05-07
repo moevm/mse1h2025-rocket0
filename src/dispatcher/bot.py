@@ -8,6 +8,7 @@ from http import HTTPStatus
 from pydantic import BaseModel
 from models.enums import EventType, RoomType
 from handler import Handler, CallbackType
+from datetime import datetime, timezone
 import asyncio
 import uuid
 
@@ -82,21 +83,45 @@ class Bot[T: BaseModel]:
 
         return channels
 
-    # TODO: тут тоже надо будет поддержать oldest и latest (думаю надо будет уже str передавать, но мб и datetime)
-    def get_group_history(self, group_id: str) -> dict[str, Any]:
-        response = self.sync_client.groups_history(group_id, inclusive=True, count=0, offset=0)
+    def get_channel_history(self, channel_id: str, oldest: datetime = None, latest: datetime = None) -> dict[str, Any]:
+        params = {
+            "count": 0,
+            "offset": 0,
+        }
+        if oldest:
+            params["oldest"] = oldest.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        if latest:
+            params["latest"] = latest.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        response = self.sync_client.channels_history(channel_id, **params)
         if response.status_code != HTTPStatus.OK:
             return {}
 
         return response.json()
-    
+
+    def get_group_history(self, group_id: str, oldest: datetime = None, latest: datetime = None) -> dict[str, Any]:
+        params = {
+            "inclusive": True,
+            "count": 0,
+            "offset": 0,
+        }
+        if oldest:
+            params["oldest"] = oldest.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        if latest:
+            params["latest"] = latest.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        response = self.sync_client.groups_history(group_id, **params)
+        if response.status_code != HTTPStatus.OK:
+            return {}
+
+        return response.json()
+
     def get_roles(self, user_id: str = None, username: str = None) -> list[str] | None:
         if not (user_id or username):
             return None
-        
+
         response = self.sync_client.users_info(user_id=user_id, username=username)
         if response.status_code != HTTPStatus.OK:
             return None
-        
-        return response.json().get("user", {}).get("roles", [])
 
+        return response.json().get("user", {}).get("roles", [])
