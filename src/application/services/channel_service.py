@@ -3,11 +3,11 @@ from typing import Any
 import re
 from models.domain import ChatMessage, ChatMessageSender
 from models.dto import RequestContext
-from models.enums import RoomType
+from application.services.common import get_channel_history
 from dispatcher import Bot
 
 
-class GroupService:
+class ChannelService:
     def __init__(self, command_prefix, service_reactions, priviliged_roles):
         self._command_prefix = command_prefix
         self._service_reactions = service_reactions
@@ -20,11 +20,11 @@ class GroupService:
         from_date: datetime = None,
         to_date: datetime = None,
     ) -> list[ChatMessage]:
-        groups = list(filter(lambda chan: chan["t"] == RoomType.GROUP, await bot.get_channels()))
+        channels: list[dict[str, str]] = await bot.get_channels()
         result: list[ChatMessage] = []
-        
-        for group in groups:
-            history_data: dict[str, Any] = bot.get_group_history(group["_id"], oldest=from_date, latest=to_date)
+
+        for channel in channels:
+            history_data: dict[str, Any] = get_channel_history(bot, channel, oldest=from_date, latest=to_date)
             messages: list[dict[str, Any]] = history_data.get("messages", [])
 
             unanswered: dict[str, ChatMessage] = {}
@@ -39,22 +39,18 @@ class GroupService:
                     continue
 
                 sender_id = message["u"]["_id"]
-                '''
-                if sender_id == ctx.sender_id:
-                    continue
-                '''
 
                 if sender_id == bot.id:
                     continue
 
                 if "reactions" in message:
                     reactions = self._service_reactions & set(message["reactions"].keys())
-                                
+
                     if any(
                         bool(self._priviliged_roles & set(bot.get_roles(username=username)))
                         for reaction in reactions
                         for username in message["reactions"][reaction]["usernames"]
-                        ):
+                    ):
                         continue
 
                 if "tmid" in message:

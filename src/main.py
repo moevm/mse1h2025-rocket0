@@ -3,7 +3,7 @@ from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser, CommandInfo, ArgSchema
 from handler.filters import CommandFilter, RoleFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
 from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler, FindMessageHandler
-from application.services import GroupService, StatsService
+from application.services import ChannelService, GroupService, StatsService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs, StatsArgs, FindMessageArgs
 from config import Config
@@ -20,21 +20,21 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
     stats_service = StatsService()
     stats_handler = StatsHandler(stats_service)
     bot.register_handler(stats_handler.handle,
-                         StatsArgs, 
+                         StatsArgs,
                          filters=[CommandFilter(Command.STATS), RoleFilter(cfg.priviliged_roles)])
 
-    group_service = GroupService(cfg.command_prefix, cfg.service_reactions, cfg.priviliged_roles)
-    find_unanswered_handler = FindUnansweredHandler(cfg.user_server_url, group_service)
+    channel_service = ChannelService(cfg.command_prefix, cfg.service_reactions, cfg.priviliged_roles)
+    find_unanswered_handler = FindUnansweredHandler(cfg.user_server_url, channel_service)
 
     bot.register_handler(find_unanswered_handler.handle,
                          FindUnansweredArgs,
                          filters=[CommandFilter(Command.FIND_UNANSWERED), RoleFilter(cfg.priviliged_roles)])
     
-    find_message_handler = FindMessageHandler(cfg.user_server_url, group_service)
+    find_message_handler = FindMessageHandler(cfg.user_server_url, channel_service)
     bot.register_handler(find_message_handler.handle,
                          FindMessageArgs,
                          filters=[CommandFilter(Command.FIND_MESSAGE), NonRepeatedFilter(), RoleFilter(cfg.priviliged_roles)])
-    
+
     # Должен регистрироваться после всех команд
     question_handler = QuestionHandler()
     bot.register_handler(question_handler.handle, NoArgs,
