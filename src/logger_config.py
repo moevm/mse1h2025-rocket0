@@ -31,10 +31,11 @@ def setup_logger(name: str, level: int = logging.INFO, to_console: bool = False,
     return logger
 
 
-def add_telegram_handler(base_logger: logging.Logger, token: str, allowed_user_ids: list[int]) -> None:
-    tg_logger.setup(base_logger, token=token, users=allowed_user_ids)
-
-
+telegram_logger = setup_logger("telegram", logging.INFO)
 general_logger = setup_logger("general", logging.INFO, to_console=True)
 requests_logger = setup_logger("requests", logging.INFO, to_file="requests.log", to_console=True)
 debug_logger = setup_logger("debug", logging.DEBUG, to_console=True)
+
+
+def add_telegram_handler(token: str, allowed_user_ids: list[int]) -> None:
+    tg_logger.setup(telegram_logger, token=token, users=allowed_user_ids)
