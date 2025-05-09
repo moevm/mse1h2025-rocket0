@@ -1,11 +1,11 @@
 import logging
 import os
+import tg_logger
 from logging.handlers import RotatingFileHandler
 from pythonjsonlogger import json
 
 LOG_DIR = "../logs"
 os.makedirs(LOG_DIR, exist_ok=True)
-
 
 def setup_logger(name: str, level: int = logging.INFO, to_console: bool = False, to_file: str | None = None) -> logging.Logger:
     logger = logging.getLogger(name)
@@ -31,6 +31,12 @@ def setup_logger(name: str, level: int = logging.INFO, to_console: bool = False,
     return logger
 
 
+telegram_logger = setup_logger("telegram", logging.INFO)
 general_logger = setup_logger("general", logging.INFO, to_console=True)
 requests_logger = setup_logger("requests", logging.INFO, to_file="requests.log", to_console=True)
 debug_logger = setup_logger("debug", logging.DEBUG, to_console=True)
+
+
+def add_telegram_handler(token: str, allowed_user_ids: list[int]) -> None:
+    tg_logger.setup(telegram_logger, token=token, users=allowed_user_ids,
+                    tg_format="<b>(%(levelname)s)</b> %(asctime)s: <code>%(message)s</code>")
