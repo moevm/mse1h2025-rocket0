@@ -38,4 +38,5 @@ debug_logger = setup_logger("debug", logging.DEBUG, to_console=True)
 
 
 def add_telegram_handler(token: str, allowed_user_ids: list[int]) -> None:
-    tg_logger.setup(telegram_logger, token=token, users=allowed_user_ids)
+    tg_logger.setup(telegram_logger, token=token, users=allowed_user_ids,
+                    tg_format="<b>(%(levelname)s)</b> %(asctime)s: <code>%(message)s</code>")
