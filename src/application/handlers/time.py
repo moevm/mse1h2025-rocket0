@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from datetime import datetime
 from models.dto import RequestContext, NoArgs
 from application.handlers.interface import ApplicationHandler
-from logger_config import requests_logger
+from logger_config import telegram_logger
 
 
 if TYPE_CHECKING:
