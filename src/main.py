@@ -7,7 +7,7 @@ from application.services import ChannelService, StatsService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs, StatsArgs
 from config import Config
-from logger_config import general_logger, requests_logger, add_telegram_handler
+from logger_config import general_logger, add_telegram_handler
 import asyncio
 
 
