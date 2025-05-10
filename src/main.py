@@ -28,12 +28,12 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
 
     bot.register_handler(find_unanswered_handler.handle,
                          FindUnansweredArgs,
-                         filters=[CommandFilter(Command.FIND_UNANSWERED), RoleFilter(cfg.priviliged_roles)])
+                         filters=[CommandFilter(Command.FIND_UNANSWERED), RoleFilter(cfg.privileged_roles)])
     
     find_message_handler = FindMessageHandler(cfg.user_server_url, channel_service)
     bot.register_handler(find_message_handler.handle,
                          FindMessageArgs,
-                         filters=[CommandFilter(Command.FIND_MESSAGE), NonRepeatedFilter(), RoleFilter(cfg.priviliged_roles)])
+                         filters=[CommandFilter(Command.FIND_MESSAGE), NonRepeatedFilter(), RoleFilter(cfg.privileged_roles)])
 
     # Должен регистрироваться после всех команд
     question_handler = QuestionHandler()
