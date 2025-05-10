@@ -10,12 +10,12 @@ if TYPE_CHECKING:
     from dispatcher.bot import Bot
     
 class FindMessageHandler(ApplicationHandler):
-    def __init__(self, server_url: str, group_service: ChannelService) -> None:
+    def __init__(self, server_url: str, channel_service: ChannelService) -> None:
         self._server_url = server_url
-        self._group_service = group_service
+        self._channel_service = channel_service
         
     async def handle(self, bot: Bot, ctx: RequestContext, input: FindMessageArgs) -> None:
-        messages = await self._group_service.get_messages_by_pattern(bot, input.pattern)
+        messages = await self._channel_service.get_messages_by_pattern(bot, input.pattern)
         
         response_blocks: list[str] = [
             f"[ ](http://{self._server_url}/group/{message.rid}?msg={message.id})\n"
