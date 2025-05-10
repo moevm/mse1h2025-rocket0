@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any
+import re
 from models.domain import ChatMessage, ChatMessageSender
 from models.dto import RequestContext
 from application.services.common import get_channel_history
@@ -66,5 +67,40 @@ class ChannelService:
                     )
 
             result.extend(list(unanswered.values()))
+
+        return result
+    
+    async def get_messages_by_pattern(
+        self,
+        bot: Bot,
+        pattern: str
+    ) -> list[ChatMessage]:
+        regex = re.compile(pattern)
+        channels: list[dict[str, str]] = await bot.get_channels()
+        result: list[ChatMessage] = []
+        
+        for channel in channels:
+            history_data: dict[str, Any] = get_channel_history(bot, channel)
+            messages: list[dict[str, Any]] = history_data.get("messages", [])
+            
+            for message in messages:
+                if "t" in message:
+                    continue
+
+                if message["msg"].startswith(self._command_prefix):
+                    continue
+
+                sender_id = message["u"]["_id"]
+
+                if sender_id == bot.id:
+                    continue
+      
+                if "msg" in message and regex.search(message["msg"]):
+                    result.append(ChatMessage(
+                        id=message["_id"],
+                        rid=message["rid"],
+                        msg=message["msg"],
+                        u=ChatMessageSender(id=message["u"]["_id"], username=message["u"]["username"])
+                    ))
 
         return result

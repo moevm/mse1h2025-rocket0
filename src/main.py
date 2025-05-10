@@ -2,10 +2,10 @@ from datetime import datetime
 from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser, CommandInfo, ArgSchema
 from handler.filters import CommandFilter, RoleFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
-from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler
+from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler, FindMessageHandler
 from application.services import ChannelService, StatsService
 from models.enums import Command
-from models.dto import NoArgs, FindUnansweredArgs, StatsArgs
+from models.dto import NoArgs, FindUnansweredArgs, StatsArgs, FindMessageArgs
 from config import Config
 from logger_config import general_logger, add_telegram_handler
 import asyncio
@@ -30,6 +30,11 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
                          FindUnansweredArgs,
                          filters=[CommandFilter(Command.FIND_UNANSWERED), RoleFilter(cfg.privileged_roles)])
     
+    find_message_handler = FindMessageHandler(cfg.user_server_url, channel_service)
+    bot.register_handler(find_message_handler.handle,
+                         FindMessageArgs,
+                         filters=[CommandFilter(Command.FIND_MESSAGE), NonRepeatedFilter(), RoleFilter(cfg.privileged_roles)])
+
     # Должен регистрироваться после всех команд
     question_handler = QuestionHandler()
     bot.register_handler(question_handler.handle, NoArgs,
@@ -51,11 +56,15 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
         'users': ArgSchema(str, nargs='*'),
         'roles': ArgSchema(str, nargs='*'),
     }
+    find_message_schema = {
+        'pattern': ArgSchema(str, positional=True)
+    }
 
     parser = ChatCommandParser({
         "time": CommandInfo(Command.TIME),
         "find_unanswered": CommandInfo(Command.FIND_UNANSWERED, find_unanswered_schema),
         "stats": CommandInfo(Command.STATS, stats_schema),
+        "find_message": CommandInfo(Command.FIND_MESSAGE, find_message_schema),
     }, cfg.command_prefix)
 
     dispatcher = Dispatcher(bots, parser)
