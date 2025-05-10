@@ -30,4 +30,5 @@ jobs:
 
       - name: Run bot
         run: |
+          cp .env.example .env
           make bot-compose-up

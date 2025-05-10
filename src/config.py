@@ -12,11 +12,15 @@ class Config:
     command_prefix: str = "!"
     service_reactions: frozenset[str] = frozenset((":gear:",))
     user_server_url: str = field(default=os.getenv("ROCKET_CHAT_URL"))
-    priviliged_roles: frozenset[str] = field(default=frozenset(os.getenv("PRIVILIGED_ROLES").replace(" ", "").split(",")))
+    privileged_roles: frozenset[str] = field(
+        default=frozenset(os.getenv("PRIVILEGED_ROLES", "").replace(" ", "").split(",")))
+    telegram_token: str = field(default=os.getenv("TELEGRAM_TOKEN"))
+    telegram_users_allow_list: frozenset[int] = field(
+        default=frozenset(map(int, os.getenv("TELEGRAM_USERS_ALLOW_LIST", "").replace(" ", "").split(","))))
 
     def __post_init__(self):
         if self.env_type in ("dev", ""):
             self.user_server_url = self.rocket_chat_url.replace("host.docker.internal", "localhost")
 
-        if os.getenv("PRIVILIGED_ROLES") == "":
-            self.priviliged_roles = frozenset(("admin",))
+        if os.getenv("PRIVILEGED_ROLES") == "":
+            self.privileged_roles = frozenset(("admin",))
