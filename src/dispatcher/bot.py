@@ -68,6 +68,9 @@ class Bot[T: BaseModel]:
     async def send_message(self, text: str, channel_id: str, thread_id: str | None = None) -> None:
         await self.async_client.send_message(text, channel_id, thread_id)
 
+    async def send_file(self, file: str, channel_id: str | None = None) -> None:
+        await self.sync_client.rooms_upload(rid=channel_id, file=file)
+    
     async def get_channels(self) -> list[dict[str, str]]:
         """
         Возвращает список каналов, в которых состоит бот, в формате:
