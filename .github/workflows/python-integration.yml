@@ -49,13 +49,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      - name: Check for test file existence
-        run: |
-          if [ ! -f test_integration.py ]; then 
-            echo "Test file not found!"; 
-            exit 1; 
-          fi
-
       - name: Run integration tests
         run: |
-          python test_integration.py  
+          python tests/test_integration.py  

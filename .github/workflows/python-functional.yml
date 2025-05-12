@@ -19,18 +19,36 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build and run chat services
+      - name: Build chat services
         run: |
           cp .env.example .env
           make chat-compose-up
+
+      - name: Wait for MongoDB to be ready
+        run: |
+          echo "Waiting for MongoDB to be ready..."
+          for i in {1..30}; do
+            if mongo --eval "db.runCommand({ ping: 1 })" &> /dev/null; then
+              echo "MongoDB is ready!"
+              break
+            fi
+            echo "MongoDB is not ready yet. Waiting..."
+            sleep 2
+          done
+
+      - name: Load chat dump
+        run: |
           make load-chat-dump
+
+      - name: Start bot services
+        run: |
           make bot-compose-up
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests time datetime pytz
+          pip install requests datetime pytz
 
       - name: Run functional tests
         run: |
-          python test_functional.py 
+          python tests/test_functional.py 
