@@ -3,8 +3,10 @@ name: Python integration
 on:
   push:
     branches:
-      - main  # Укажите вашу основную ветку
+      - '*'
   pull_request:
+    branches:
+      - '*'
 
 jobs:
   test:
@@ -19,6 +21,7 @@ jobs:
 
       - name: Build and run chat services
         run: |
+          cp .env.example .env
           make chat-compose-up
           make load-chat-dump
           make bot-compose-up
