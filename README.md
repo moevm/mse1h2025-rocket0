@@ -6,26 +6,32 @@
 - скопировать настройки среды командой `cp .env.example .env`
 - Прописать команду:`make chat-compose-up`. Она создаст инстанс рокетчата и поднимет контейнер с ним: нужно дождать полной загрузки:
 
+
 ![изображение](https://github.com/user-attachments/assets/d38cc4d4-6c44-40e4-a3ae-d9812d30501e)
 
 - Подгрузить дамп чата `make load-chat-dump`, подождать, пока дамп подгрузится
 
+
 ![изображение](https://github.com/user-attachments/assets/8fb09596-bdb6-4078-91ba-594c78bf2c41)
 
 - Прописать команду `make bot-compose-up`: она поднимет бота и подключится к инстансу рокетчата. Также нужно подождать, пока бот загрузится полностью:
+
 
 ![изображение](https://github.com/user-attachments/assets/504b1e63-b1d7-44bf-a4b5-03578cf754ed)
 
 - Подключиться к рокетчату через браузер по `localhost:3000`
 - Авторизоваться: логин `for_dump`; пароль `123456`
 
+
 ![изображение](https://github.com/user-attachments/assets/fe322cc4-1470-446c-b57b-44dc9f3ddd21)
 
 Если все сделано правильно, то на экране откроется рокет чат с 5 каналами:
 
+
 ![изображение](https://github.com/user-attachments/assets/33a3f4fe-4833-4c97-b9d7-46ce12ee1783)
 
 - для проверки, что бот доступен, напишите в канал #general команду `!find_unanswered` - в ответ бот должен переслать сообщения без ответа:
+
 
 ![изображение](https://github.com/user-attachments/assets/c4cd27b1-d08b-4184-b296-54b69509f3cf)
 
