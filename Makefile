@@ -17,4 +17,4 @@ chat-compose-down:
 .PHONY: load-chat-dump
 load-chat-dump:
 	docker cp ./dump chat_infrastructure-mongodb-1:/dump
-	docker exec -it chat_infrastructure-mongodb-1 mongorestore --drop /dump
+	docker exec -i chat_infrastructure-mongodb-1 mongorestore --drop /dump
