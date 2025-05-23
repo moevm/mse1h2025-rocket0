@@ -6,6 +6,7 @@ from typing import Callable, Any, TYPE_CHECKING
 from functools import partial
 from http import HTTPStatus
 from pydantic import BaseModel
+from models.domain import Channel
 from models.enums import EventType, RoomType
 from handler import Handler, CallbackType
 from datetime import datetime, timezone
@@ -71,17 +72,16 @@ class Bot[T: BaseModel]:
     async def send_file(self, file: str, channel_id: str | None = None) -> None:
         await self.sync_client.rooms_upload(rid=channel_id, file=file)
     
-    async def get_channels(self) -> list[dict[str, str]]:
+    async def get_channels(self) -> list[Channel]:
         """
-        Возвращает список каналов, в которых состоит бот, в формате:
-        [{"_id": "channel_id", "t": "channel_type", "name": "channel_name"}, ...]
+        Возвращает список каналов (объектов Channel), в которых состоит бот.
         """
-        channels: list[dict[str, str]] = [
-            {
-                "_id": channel["_id"],
-                "t": channel["t"],
-                "name": "direct" if channel["t"] == RoomType.DIRECT else channel["name"]
-            }
+        channels: list[Channel] = [
+            Channel(
+                id=channel["_id"],
+                type=channel["t"],
+                name=channel.get("name")
+            )
             for channel in await self.async_client.get_channels_raw()
         ]
 

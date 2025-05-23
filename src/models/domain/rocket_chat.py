@@ -13,3 +13,10 @@ class ChatMessage:
     rid: str
     msg: str
     u: ChatMessageSender
+
+
+@dataclass
+class Channel:
+    id: str
+    type: str
+    name: str | None = None
