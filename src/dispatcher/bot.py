@@ -7,7 +7,7 @@ from functools import partial
 from http import HTTPStatus
 from pydantic import BaseModel
 from models.domain import Channel
-from models.enums import EventType, RoomType
+from models.enums import EventType
 from handler import Handler, CallbackType
 from datetime import datetime, timezone
 import asyncio
@@ -30,7 +30,9 @@ class Bot[T: BaseModel]:
 
         self._local_id: uuid.UUID = uuid.uuid4()
         self._id: str = self.sync_client.me().json()["_id"]
+        self._callback: Callable[..., None] | None = None
 
+        self._followed_channels: dict[str, Channel] = {}
         self._handlers: list[Handler] = []
 
     @property
@@ -42,20 +44,34 @@ class Bot[T: BaseModel]:
         return self._id
 
     async def run(self, callback: Callable[..., None]) -> None:
+        self._callback = callback
         attempts: int = 5
+
         while attempts > 0:
             try:
                 await self.async_client.start(f'ws://{self._server_url}/websocket', self._username, self._password)
-
-                for channel_id, _ in await self.async_client.get_channels():
-                    await self.async_client.subscribe_to_channel_messages(
-                        channel_id, partial(callback, self.local_id, EventType.MESSAGE)
-                    )
-
+                await self.refresh_followed_channels()
                 await self.async_client.run_forever()
             except (RocketChatAsync.ConnectionClosed, RocketChatAsync.ConnectCallFailed):
                 await asyncio.sleep(3)
                 attempts -= 1
+
+    async def refresh_followed_channels(self) -> list[Channel]:
+        channels: list[Channel] = await self.get_channels()
+        new_channels: list[Channel] = []
+
+        for channel in channels:
+            if channel.id in self._followed_channels:
+                continue
+
+            await self.async_client.subscribe_to_channel_messages(
+                channel.id, partial(self._callback, self.local_id, EventType.MESSAGE)
+            )
+
+            self._followed_channels[channel.id] = channel
+            new_channels.append(channel)
+
+        return new_channels
 
     def register_handler(self, callback: CallbackType, input_type: type[T], filters: list[HandlerFilter]) -> None:
         self._handlers.append(Handler(callback, self, input_type, filters))
@@ -71,7 +87,7 @@ class Bot[T: BaseModel]:
 
     async def send_file(self, file: str, channel_id: str | None = None) -> None:
         await self.sync_client.rooms_upload(rid=channel_id, file=file)
-    
+
     async def get_channels(self) -> list[Channel]:
         """
         Возвращает список каналов (объектов Channel), в которых состоит бот.
