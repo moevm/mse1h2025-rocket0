@@ -2,7 +2,8 @@ from datetime import datetime
 from dispatcher import Dispatcher, Bot
 from parsers import ChatCommandParser, CommandInfo, ArgSchema
 from handler.filters import CommandFilter, RoleFilter, RegexFilter, NonRepeatedFilter, NoThreadFilter
-from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler, FindMessageHandler
+from application.handlers import TimeCommandHandler, FindUnansweredHandler, StatsHandler, QuestionHandler, \
+    FindMessageHandler, RefreshCommandHandler
 from application.services import ChannelService, StatsService
 from models.enums import Command
 from models.dto import NoArgs, FindUnansweredArgs, StatsArgs, FindMessageArgs
@@ -17,10 +18,15 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
                          NoArgs,
                          filters=[CommandFilter(Command.TIME), RoleFilter(cfg.privileged_roles)])
 
+    refresh_handler = RefreshCommandHandler()
+    bot.register_handler(refresh_handler.handle,
+                         NoArgs,
+                         filters=[CommandFilter(Command.REFRESH), RoleFilter(cfg.privileged_roles)])
+
     stats_service = StatsService()
     stats_handler = StatsHandler(stats_service)
     bot.register_handler(stats_handler.handle,
-                         StatsArgs, 
+                         StatsArgs,
                          filters=[CommandFilter(Command.STATS), RoleFilter(cfg.privileged_roles)])
 
     channel_service = ChannelService(cfg.command_prefix, cfg.service_reactions, cfg.privileged_roles)
@@ -29,7 +35,7 @@ def register_handlers(bot: Bot, cfg: Config) -> None:
     bot.register_handler(find_unanswered_handler.handle,
                          FindUnansweredArgs,
                          filters=[CommandFilter(Command.FIND_UNANSWERED), RoleFilter(cfg.privileged_roles)])
-    
+
     find_message_handler = FindMessageHandler(cfg.user_server_url, channel_service)
     bot.register_handler(find_message_handler.handle,
                          FindMessageArgs,
@@ -65,6 +71,7 @@ def prepare_dispatcher(bots: list[Bot], cfg: Config) -> Dispatcher:
         "find_unanswered": CommandInfo(Command.FIND_UNANSWERED, find_unanswered_schema),
         "stats": CommandInfo(Command.STATS, stats_schema),
         "find_message": CommandInfo(Command.FIND_MESSAGE, find_message_schema),
+        "refresh": CommandInfo(Command.REFRESH)
     }, cfg.command_prefix)
 
     dispatcher = Dispatcher(bots, parser)
