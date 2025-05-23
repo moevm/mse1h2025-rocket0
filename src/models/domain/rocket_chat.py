@@ -19,4 +19,4 @@ class ChatMessage:
 class Channel:
     id: str
     type: str
-    name: str = None
+    name: str | None = None

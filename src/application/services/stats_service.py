@@ -63,13 +63,13 @@ class StatsService:
         channel_names: dict[str, str] = {}
 
         raw_channels: list[Channel] = await bot.get_channels()
-        channel_names = {c.id: c.name or "Unknown" for c in raw_channels}
+        channel_names = {c.id: c.name for c in raw_channels}
 
         target_channels = raw_channels
 
         if all_channels:
             target_channels = [ch for ch in raw_channels if ch.name in all_channels]
-            channel_names = {c.id: c.name or "Unknown" for c in target_channels}
+            channel_names = {c.id: c.name for c in target_channels}
 
         for channel in target_channels:
             channel_id = channel.id

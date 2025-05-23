@@ -14,7 +14,7 @@ class QuestionHandler(ApplicationHandler):
         debug_logger.debug(ctx)
 
         await bot.send_message(
-            f"Вы можете поискать свой ответ [тут](https://se.moevm.info/doku.php).",
+            f"Вы можете поискать свой ответ [тут](https://www.youtube.com/watch?v=dQw4w9WgXcQ).",
             ctx.channel_id,
             ctx.msg_id,
         )
