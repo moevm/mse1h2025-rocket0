@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 import re
 from models.domain import ChatMessage, ChatMessageSender
@@ -19,7 +19,14 @@ class ChannelService:
         ctx: RequestContext,
         from_date: datetime = None,
         to_date: datetime = None,
+        hours: int = None,
     ) -> list[ChatMessage]:
+        if hours is not None:
+            if to_date is not None:
+                from_date = from_date or (to_date - timedelta(hours=hours))
+            else:
+                from_date = from_date or (datetime.now() - timedelta(hours=hours))
+        
         channels: list[dict[str, str]] = await bot.get_channels()
         result: list[ChatMessage] = []
 
