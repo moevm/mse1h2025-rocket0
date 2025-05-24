@@ -5,3 +5,4 @@ from datetime import datetime
 class FindUnansweredArgs(BaseModel):
     from_date: datetime | None = Field(default=None, alias="from")
     to_date: datetime | None = Field(default=None, alias="to")
+    hours: int | None = None
