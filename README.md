@@ -1,5 +1,3 @@
-![image](https://github.com/user-attachments/assets/6a57b6e1-ca49-4b14-bb02-73980c285684)# mse-2025-template
-
 ## Инструкция по запуску
 
 - Склонировать репозиторий и перейти в папку с ним
