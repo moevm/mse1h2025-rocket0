@@ -19,7 +19,7 @@ class ChannelService:
         ctx: RequestContext,
         from_date: datetime = None,
         to_date: datetime = None,
-        hours: int = None,
+        hours: int | None = None,
     ) -> list[ChatMessage]:
         if hours is not None:
             if to_date is not None:
