@@ -2,7 +2,7 @@ import asyncio
 from http import HTTPStatus
 from datetime import datetime
 from models.dto import RequestContext
-from models.domain import UserStats, ChannelStats, StatsData
+from models.domain import UserStats, ChannelStats, StatsData, Channel
 from application.services.common import get_channel_history
 from dispatcher import Bot
 from logger_config import general_logger
@@ -62,18 +62,17 @@ class StatsService:
         user_names: dict[str, str] = {}
         channel_names: dict[str, str] = {}
 
-        raw_channels = await bot.get_channels()
-        channel_names = {c["_id"]: c.get("name", "Unknown")
-                         for c in raw_channels}
+        raw_channels: list[Channel] = await bot.get_channels()
+        channel_names = {c.id: c.name for c in raw_channels}
 
         target_channels = raw_channels
 
         if all_channels:
-            target_channels = [ch for ch in raw_channels if ch.get("name") in all_channels]
-            channel_names = {c["_id"]: c.get("name", "Unknown") for c in target_channels}
+            target_channels = [ch for ch in raw_channels if ch.name in all_channels]
+            channel_names = {c.id: c.name for c in target_channels}
 
         for channel in target_channels:
-            channel_id = channel["_id"]
+            channel_id = channel.id
 
             if channel_id not in channels:
                 channels[channel_id] = ChannelStats()
@@ -140,7 +139,7 @@ class StatsService:
             # Пересчитываем статистику каналов ТОЛЬКО для отфильтрованных пользователей
             final_channels: dict[str, ChannelStats] = {}
             for channel in target_channels:
-                channel_id = channel["_id"]
+                channel_id = channel.id
                 final_channels[channel_id] = ChannelStats()
 
                 history = bot.get_group_history(channel_id, oldest=from_date, latest=to_date)
