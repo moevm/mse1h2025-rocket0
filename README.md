@@ -4,7 +4,6 @@
 - скопировать настройки среды командой `cp .env.example .env`
 - Прописать команду:`make chat-compose-up`. Она создаст инстанс рокетчата и поднимет контейнер с ним: нужно дождать полной загрузки:
 
-
 ![изображение](https://github.com/user-attachments/assets/d38cc4d4-6c44-40e4-a3ae-d9812d30501e)
 
 - Подгрузить дамп чата `make load-chat-dump`, подождать, пока дамп подгрузится
@@ -57,6 +56,21 @@
 Если всё пройдёт успешно, бот будет присылать вам сообщения подобного вида: `requests:INFO - Command.TIME None`
 
 ## Интеграция бота в существующий инстанс
+
+### 0. Подготовка чата
+При необходимости изменить файл `.env`:
+
+`ROCKET_CHAT_USER` - имя бота в чате
+`ROCKET_CHAT_PASSWORD` - пароль бота в чате
+`PRIVILEGED_ROLES` - через запятую указываются привилегированные роли (по умолчанию только 'admin')
+
+Настройка чата
+Боту необходимо выдать разрешение, указанное на картинке ниже (`Administration > Workspace > Permissions`)
+![image](https://github.com/user-attachments/assets/99fa9d53-bfae-4099-8dd9-c860d5c7c6bc)
+
+Также необходимо применить настройки, изображённые на картинке ниже `Administration > Workspace > Settings > General > REST API`
+![image](https://github.com/user-attachments/assets/fd0b709a-ffce-4b8b-ab8b-100f41638a01)
+
 
 ### 1. Создание бота
 
