@@ -53,7 +53,7 @@ class StatsService:
         ctx: RequestContext,
         from_date: datetime | None = None,
         to_date: datetime | None = None,
-        hours: int = None,
+        hours: int | None = None,
         all_channels: list[str] | None = None,
         all_users: list[str] | None = None,
         all_roles: list[str] | None = None
