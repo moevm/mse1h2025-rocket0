@@ -1,6 +1,6 @@
 import asyncio
 from http import HTTPStatus
-from datetime import datetime
+from datetime import datetime, timedelta
 from models.dto import RequestContext
 from models.domain import UserStats, ChannelStats, StatsData
 from application.services.common import get_channel_history
@@ -53,10 +53,14 @@ class StatsService:
         ctx: RequestContext,
         from_date: datetime | None = None,
         to_date: datetime | None = None,
+        hours: int = None,
         all_channels: list[str] | None = None,
         all_users: list[str] | None = None,
         all_roles: list[str] | None = None
     ) -> StatsData:
+        to_date = to_date or datetime.now()
+        if hours is not None:
+            from_date = from_date or (to_date - timedelta(hours=hours))
         users: dict[str, UserStats] = {}
         channels: dict[str, ChannelStats] = {}
         user_names: dict[str, str] = {}
