@@ -16,7 +16,7 @@ class FindUnansweredHandler(ApplicationHandler):
         self._group_service: ChannelService = channel_service
 
     async def handle(self, bot: Bot, ctx: RequestContext, input: FindUnansweredArgs) -> None:
-        messages = await self._group_service.get_unanswered_messages(bot, ctx, input.from_date, input.to_date)
+        messages = await self._group_service.get_unanswered_messages(bot, ctx, input.from_date, input.to_date, input.hours)
 
         response_blocks: list[str] = [
             f"[ ](http://{self._server_url}/group/{message.rid}?msg={message.id})\n"
