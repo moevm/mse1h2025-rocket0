@@ -21,11 +21,9 @@ class ChannelService:
         to_date: datetime = None,
         hours: int | None = None,
     ) -> list[ChatMessage]:
+        to_date = to_date or datetime.now()
         if hours is not None:
-            if to_date is not None:
-                from_date = from_date or (to_date - timedelta(hours=hours))
-            else:
-                from_date = from_date or (datetime.now() - timedelta(hours=hours))
+            from_date = from_date or (to_date - timedelta(hours=hours))
         
         channels: list[Channel] = await bot.get_channels()
         result: list[ChatMessage] = []
