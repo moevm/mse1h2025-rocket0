@@ -24,6 +24,7 @@ class StatsHandler(ApplicationHandler):
             ctx,
             input.from_date,
             input.to_date,
+            input.hours,
             input.channels,
             input.users,
             input.roles
