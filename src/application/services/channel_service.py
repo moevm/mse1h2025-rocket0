@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 import re
-from models.domain import ChatMessage, ChatMessageSender
+from models.domain import ChatMessage, ChatMessageSender, Channel
 from models.dto import RequestContext
 from application.services.common import get_channel_history
 from dispatcher import Bot
@@ -27,7 +27,7 @@ class ChannelService:
             else:
                 from_date = from_date or (datetime.now() - timedelta(hours=hours))
         
-        channels: list[dict[str, str]] = await bot.get_channels()
+        channels: list[Channel] = await bot.get_channels()
         result: list[ChatMessage] = []
 
         for channel in channels:
@@ -83,7 +83,7 @@ class ChannelService:
         pattern: str
     ) -> list[ChatMessage]:
         regex = re.compile(pattern)
-        channels: list[dict[str, str]] = await bot.get_channels()
+        channels: list[Channel] = await bot.get_channels()
         result: list[ChatMessage] = []
         
         for channel in channels:

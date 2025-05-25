@@ -6,3 +6,4 @@ class Command(Enum):
     FIND_UNANSWERED = 2
     STATS = 3
     FIND_MESSAGE = 4
+    REFRESH = 5
