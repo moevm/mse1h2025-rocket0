@@ -86,7 +86,7 @@ if __name__ == '__main__':
     if len(config.telegram_token) > 0:
         add_telegram_handler(config.telegram_token, list(config.telegram_users_allow_list))
 
-    b = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password)
+    b = Bot(config.rocket_chat_url, config.rocket_chat_user, config.rocket_chat_password, config.env_type != "dev")
     register_handlers(b, config)
 
     dp = prepare_dispatcher([b], config)
