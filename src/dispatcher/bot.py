@@ -28,7 +28,7 @@ class Bot[T: BaseModel]:
 
         self.async_client: RocketChatAsync = RocketChatAsync()
         self.sync_client: RocketChat = RocketChat(
-            username, password, server_url=f'{"https" if self._secure else "http"}://{server_url}')
+            username, password, server_url=f'{self.http}://{server_url}')
 
         self._local_id: uuid.UUID = uuid.uuid4()
         self._id: str = self.sync_client.me().json()["_id"]
@@ -45,6 +45,14 @@ class Bot[T: BaseModel]:
     def id(self) -> str:
         return self._id
 
+    @property
+    def http(self) -> str:
+        return "https" if self._secure else "http"
+
+    @property
+    def ws(self) -> str:
+        return "wss" if self._secure else "ws"
+
     async def run(self, callback: Callable[..., None]) -> None:
         self._callback = callback
         attempts: int = 5
@@ -52,7 +60,7 @@ class Bot[T: BaseModel]:
         while attempts > 0:
             try:
                 await self.async_client.start(
-                    f'{"wss" if self._secure else "ws"}://{self._server_url}/websocket', self._username, self._password)
+                    f'{self.ws}://{self._server_url}/websocket', self._username, self._password)
                 await self.refresh_followed_channels()
                 await self.async_client.run_forever()
             except (RocketChatAsync.ConnectionClosed, RocketChatAsync.ConnectCallFailed):
